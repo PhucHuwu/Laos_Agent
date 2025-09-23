@@ -1,0 +1,28 @@
+{
+  "servers": {
+    "document-mcp": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/cli",
+        "connect",
+        "http",
+        "--url",
+        "http://172.16.5.10:3009/mcp",
+        "--transport",
+        "stream"
+      ]
+    },
+    "jira-mcp": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/cli",
+        "connect",
+        "http",
+        "--url",
+        "http://172.16.5.10:9000",
+        "--transport",
+        "stream"
+      ]
+    }
+  }
+}
