@@ -1,0 +1,137 @@
+[
+  {
+    "category": "PHẦN I. QUY ĐỊNH CHUNG",
+    "title": "I. Nguyên tắc chung về hệ thống KYC",
+    "content": "- Hệ thống KYC (Know Your Customer) được phát triển để xác thực danh tính người dùng thông qua upload ảnh chứng minh thư (CMND/CCCD), xử lý OCR và xác thực khuôn mặt qua selfie.\n- Hệ thống đảm bảo tuân thủ các quy định pháp luật Việt Nam về bảo vệ dữ liệu cá nhân và chống gian lận.\n- Tất cả người dùng phải cung cấp thông tin chính xác, hợp pháp. Hệ thống không chịu trách nhiệm nếu thông tin sai lệch dẫn đến vấn đề pháp lý.\n- Hoạt động xác thực phải minh bạch, bảo vệ quyền lợi người dùng và ngăn chặn lạm dụng."
+  },
+  {
+    "category": "PHẦN I. QUY ĐỊNH CHUNG",
+    "title": "II. Định nghĩa các thuật ngữ",
+    "content": "- Người dùng: Bất kỳ cá nhân nào sử dụng hệ thống để xác thực danh tính.\n- Front End: Giao diện người dùng (Client) nơi upload ảnh và tương tác.\n- Back End: Hệ thống server xử lý validate, OCR và facial authentication.\n- OCR: Optical Character Recognition - Công nghệ nhận dạng ký tự từ ảnh.\n- Facial Authentication: Xác thực khuôn mặt bằng cách so sánh ảnh selfie với ảnh trên giấy tờ.\n- Validate: Kiểm tra tính hợp lệ của ảnh hoặc dữ liệu."
+  },
+  {
+    "category": "PHẦN I. QUY ĐỊNH CHUNG",
+    "title": "III. Phạm vi áp dụng",
+    "content": "- Hệ thống áp dụng cho tất cả người dùng đăng ký tài khoản, thực hiện giao dịch yêu cầu xác thực KYC.\n- Không áp dụng cho người dùng dưới 18 tuổi mà không có sự giám hộ hợp pháp.\n- Hệ thống có thể bị hạn chế ở một số khu vực do quy định địa phương."
+  },
+  {
+    "category": "PHẦN II. HƯỚNG DẪN SỬ DỤNG",
+    "title": "I. Hướng dẫn chuẩn bị trước khi sử dụng",
+    "content": "- Chuẩn bị giấy tờ tùy thân hợp lệ: CMND, CCCD hoặc hộ chiếu.\n- Đảm bảo thiết bị có camera chất lượng cao và kết nối internet ổn định.\n- Tải ứng dụng hoặc truy cập web front end của hệ thống.\n- Đăng nhập hoặc đăng ký tài khoản nếu cần.\n- Đọc và đồng ý với quy định bảo mật dữ liệu."
+  },
+  {
+    "category": "PHẦN II. HƯỚNG DẪN SỬ DỤNG",
+    "title": "II. Hướng dẫn upload ảnh giấy tờ",
+    "content": "- Từ giao diện front end, chọn tùy chọn 'Upload ảnh giấy tờ'.\n- Chụp hoặc chọn ảnh mặt trước và mặt sau của giấy tờ.\n- Đảm bảo ảnh rõ nét, không bị mờ, không che khuất thông tin.\n- Hệ thống sẽ tự động gửi ảnh đến back end để validate.\n- Nếu fail, hệ thống hiển thị thông báo 'Thử lại' và hướng dẫn chụp lại."
+  },
+  {
+    "category": "PHẦN II. HƯỚNG DẪN SỬ DỤNG",
+    "title": "III. Hướng dẫn upload ảnh selfie",
+    "content": "- Sau khi upload giấy tờ thành công, chuyển sang bước 'Upload ảnh selfie'.\n- Sử dụng camera front để chụp ảnh khuôn mặt trực tiếp.\n- Giữ khuôn mặt chính giữa khung, ánh sáng tốt, không đeo kính hoặc mũ.\n- Hệ thống gửi ảnh đến back end để facial authentication.\n- Nếu fail, hiển thị 'Thử lại' với lý do cụ thể như 'Khuôn mặt không rõ'."
+  },
+  {
+    "category": "PHẦN II. HƯỚNG DẪN SỬ DỤNG",
+    "title": "IV. Hướng dẫn xử lý thông báo lỗi",
+    "content": "- Nếu nhận thông báo 'Ảnh không đúng dung lượng': Kiểm tra kích thước file (thường dưới 5MB) và thử lại.\n- 'Ảnh không đúng định dạng': Sử dụng định dạng JPG, PNG hoặc PDF.\n- 'Đương mặt không khớp': Đảm bảo khuôn mặt selfie khớp với ảnh trên giấy tờ.\n- 'Khuôn mặt không rõ': Cải thiện ánh sáng và chụp lại.\n- Giới hạn thử lại: Tối đa 3 lần trước khi khóa tạm thời."
+  },
+  {
+    "category": "PHẦN II. HƯỚNG DẪN SỬ DỤNG",
+    "title": "V. Hướng dẫn hoàn tất quy trình",
+    "content": "- Sau khi tất cả validate thành công, hệ thống hiển thị thông báo 'Xác thực hoàn tất'.\n- Người dùng có thể tiếp tục sử dụng dịch vụ.\n- Lưu thông tin xác thực để sử dụng sau nếu cần.\n- Nếu cần hỗ trợ, liên hệ hotline hoặc chat support."
+  },
+  {
+    "category": "PHẦN III. QUY TRÌNH XÁC THỰC",
+    "title": "I. Quy trình tổng quát",
+    "content": "- Bắt đầu từ client: Người dùng upload ảnh giấy tờ.\n- Front end gửi đến back end.\n- Back end validate ảnh (dung lượng, định dạng).\n- Nếu valid, gọi API OCR để trích xuất thông tin.\n- Validate thông tin OCR.\n- Nếu valid, yêu cầu upload selfie.\n- Validate selfie và gọi API facial authentication.\n- Nếu tất cả valid, kết thúc quy trình."
+  },
+  {
+    "category": "PHẦN III. QUY TRÌNH XÁC THỰC",
+    "title": "II. Chi tiết bước upload ảnh giấy tờ",
+    "content": "- Người dùng chọn file hoặc chụp ảnh.\n- Front end kiểm tra sơ bộ (kích thước, loại file).\n- Gửi đến back end qua API.\n- Back end validate sâu: Kiểm tra dung lượng, định dạng, chất lượng ảnh.\n- Nếu fail: Trả về thông báo 'Thử lại' với lý do cụ thể như 'Ảnh không đúng dung lượng' hoặc 'Ảnh không đúng định dạng'."
+  },
+  {
+    "category": "PHẦN III. QUY TRÌNH XÁC THỰC",
+    "title": "III. Chi tiết bước OCR",
+    "content": "- Sau validate ảnh giấy tờ, back end gọi API OCR.\n- OCR trích xuất thông tin: Họ tên, ngày sinh, số CMND, địa chỉ, v.v.\n- Hiển thị thông tin cho người dùng xác nhận.\n- Nếu thông tin không chính xác, cho phép chỉnh sửa thủ công (với validate thêm).\n- Nếu fail OCR: Thông báo 'Thử lại' và yêu cầu upload ảnh rõ hơn."
+  },
+  {
+    "category": "PHẦN III. QUY TRÌNH XÁC THỰC",
+    "title": "IV. Chi tiết bước upload selfie và facial authentication",
+    "content": "- Người dùng chụp selfie thời gian thực.\n- Front end gửi đến back end.\n- Back end validate chất lượng ảnh selfie.\n- Gọi API facial để so sánh với ảnh trên giấy tờ (từ OCR).\n- Nếu khớp: Valid.\n- Nếu không: Fail với lý do 'Đương mặt không khớp' hoặc 'Khuôn mặt không rõ', yêu cầu 'Thử lại'."
+  },
+  {
+    "category": "PHẦN III. QUY TRÌNH XÁC THỰC",
+    "title": "V. Quy trình xử lý fail",
+    "content": "- Mỗi bước fail: Cho phép thử lại tối đa 3 lần.\n- Sau 3 lần fail: Khóa tạm thời 5 phút, sau đó cho thử lại.\n- Nếu fail liên tục: Yêu cầu hỗ trợ thủ công từ admin.\n- Log tất cả fail để phân tích và cải thiện hệ thống."
+  },
+  {
+    "category": "PHẦN IV. CHÍNH SÁCH BẢO MẬT",
+    "title": "I. Sự chấp thuận",
+    "content": "- Bằng việc sử dụng hệ thống KYC, người dùng đồng ý với việc thu thập và sử dụng thông tin cá nhân theo chính sách này.\n- Nếu không đồng ý, dừng sử dụng hệ thống ngay lập tức."
+  },
+  {
+    "category": "PHẦN IV. CHÍNH SÁCH BẢO MẬT",
+    "title": "II. Phạm vi thu thập thông tin",
+    "content": "- Thu thập ảnh giấy tờ, ảnh selfie, thông tin OCR (họ tên, ngày sinh, số ID).\n- Thông tin thiết bị: IP, loại thiết bị, thời gian truy cập.\n- Không thu thập thông tin không cần thiết cho KYC.\n- Thu thập từ nguồn hợp pháp khác nếu cần verify."
+  },
+  {
+    "category": "PHẦN IV. CHÍNH SÁCH BẢO MẬT",
+    "title": "III. Mục đích sử dụng thông tin",
+    "content": "- Xác thực danh tính người dùng.\n- Ngăn chặn gian lận, rửa tiền.\n- Cải thiện hệ thống qua phân tích dữ liệu ẩn danh.\n- Chia sẻ với cơ quan nhà nước nếu yêu cầu pháp lý.\n- Không sử dụng cho mục đích thương mại mà không có sự đồng ý."
+  },
+  {
+    "category": "PHẦN IV. CHÍNH SÁCH BẢO MẬT",
+    "title": "IV. Thời gian lưu trữ",
+    "content": "- Lưu trữ thông tin KYC trong 5 năm hoặc theo quy định pháp luật.\n- Xóa thông tin khi người dùng yêu cầu hủy, trừ trường hợp pháp lý yêu cầu giữ."
+  },
+  {
+    "category": "PHẦN IV. CHÍNH SÁCH BẢO MẬT",
+    "title": "V. Quyền của người dùng",
+    "content": "- Yêu cầu truy cập, chỉnh sửa, xóa dữ liệu cá nhân.\n- Rút đồng ý bất kỳ lúc nào.\n- Khiếu nại nếu nghi ngờ vi phạm bảo mật.\n- Liên hệ qua email hoặc hotline để thực hiện quyền."
+  },
+  {
+    "category": "PHẦN IV. CHÍNH SÁCH BẢO MẬT",
+    "title": "VI. Cam kết bảo mật",
+    "content": "- Sử dụng mã hóa dữ liệu, firewall, và các biện pháp an ninh cao cấp.\n- Chỉ chia sẻ với bên thứ ba cần thiết (như nhà cung cấp API OCR/Facial).\n- Thông báo ngay nếu có breach dữ liệu.\n- Tuân thủ GDPR và luật Việt Nam về bảo vệ dữ liệu."
+  },
+  {
+    "category": "PHẦN V. XỬ LÝ KHIẾU NẠI VÀ HỖ TRỢ",
+    "title": "I. Quy trình khiếu nại",
+    "content": "- Người dùng gửi khiếu nại qua app, email hoặc hotline.\n- Hệ thống ghi nhận và phản hồi trong 24h.\n- Điều tra và giải quyết trong 7 ngày làm việc.\n- Nếu liên quan lỗi hệ thống, bồi thường phù hợp."
+  },
+  {
+    "category": "PHẦN V. XỬ LÝ KHIẾU NẠI VÀ HỖ TRỢ",
+    "title": "II. Trách nhiệm trong lỗi kỹ thuật",
+    "content": "- Hệ thống cam kết uptime 99%, nhưng không chịu trách nhiệm cho lỗi từ phía người dùng (kết nối kém).\n- Trong trường hợp lỗi server, tự động retry hoặc thông báo.\n- Log lỗi để cải thiện."
+  },
+  {
+    "category": "PHẦN V. XỬ LÝ KHIẾU NẠI VÀ HỖ TRỢ",
+    "title": "III. Trường hợp từ chối phục vụ",
+    "content": "- Từ chối nếu nghi ngờ gian lận (fail nhiều lần).\n- Hạn chế nếu lạm dụng hệ thống (upload ảnh giả).\n- Chặn vĩnh viễn nếu vi phạm pháp luật."
+  },
+  {
+    "category": "PHẦN VI. QUYỀN VÀ NGHĨA VỤ",
+    "title": "I. Quyền của hệ thống",
+    "content": "- Thay đổi quy trình với thông báo trước.\n- Từ chối xác thực nếu thông tin không hợp lệ.\n- Sử dụng dữ liệu ẩn danh cho nghiên cứu."
+  },
+  {
+    "category": "PHẦN VI. QUYỀN VÀ NGHĨA VỤ",
+    "title": "II. Nghĩa vụ của hệ thống",
+    "content": "- Đảm bảo quy trình nhanh chóng, chính xác.\n- Bảo vệ dữ liệu người dùng.\n- Cập nhật hệ thống định kỳ."
+  },
+  {
+    "category": "PHẦN VI. QUYỀN VÀ NGHĨA VỤ",
+    "title": "III. Quyền và nghĩa vụ của người dùng",
+    "content": "- Quyền: Sử dụng miễn phí, khiếu nại.\n- Nghĩa vụ: Cung cấp thông tin chính xác, không lạm dụng."
+  },
+  {
+    "category": "PHẦN VII. HIỆU LỰC VÀ SỬA ĐỔI",
+    "title": "I. Hiệu lực",
+    "content": "- Áp dụng từ ngày 24/09/2025.\n- Có thể sửa đổi với thông báo 30 ngày."
+  },
+  {
+    "category": "PHẦN VII. HIỆU LỰC VÀ SỬA ĐỔI",
+    "title": "II. Điều khoản cam kết",
+    "content": "- Liên hệ: support@kycsystem.vn\n- Địa chỉ: TP. HCM, Việt Nam."
+  }
+]
