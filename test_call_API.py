@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 DATA = os.getenv("DATA")
 Authorization = os.getenv("Authorization")
-Url = os.getenv("url")
+Url = os.getenv("Url")
 
 def test_api_call():
     url = Url
