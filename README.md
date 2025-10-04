@@ -1,78 +1,81 @@
-# Hệ thống eKYC Căn cước công dân Lào
+# Laos eKYC Identity Verification System
 
-Hệ thống định danh điện tử (eKYC) hỗ trợ xác thực căn cước công dân Lào sử dụng AI và xác thực khuôn mặt real-time.
+A comprehensive electronic Know Your Customer (eKYC) system for Laotian citizen identity verification using AI-powered chatbot technology, OCR document scanning, and real-time facial recognition.
 
-## 🏗️ Cấu trúc dự án
+## Project Architecture
 
 ```
 Laos_Agent/
-├── backend/                    # Backend modules
-│   ├── api/                   # Flask API routes
+├── backend/                   # Backend application modules
+│   ├── api/                   # Flask API routes and endpoints
 │   ├── config/                # Configuration management
-│   ├── core/                  # Core business logic
-│   ├── models/                # Data models
-│   └── services/              # Business services
-├── frontend/                   # Frontend modules
+│   ├── core/                  # Core business logic orchestration
+│   ├── models/                # Data models and schemas
+│   └── services/              # Business service layer
+│
+├── frontend/                  # Frontend application modules
 │   ├── assets/                # Static assets (CSS, JS, images)
-│   ├── components/            # UI components
-│   ├── services/              # Frontend services
+│   ├── components/            # Reusable UI components
+│   ├── services/              # Frontend service layer
 │   └── utils/                 # Utility functions
-├── tests/                     # Test suite
+│
+├── tests/                     # Comprehensive test suite
 │   ├── unit/                  # Unit tests
 │   └── integration/           # Integration tests
-├── docs/                      # Documentation
-├── uploads/                   # File upload directory
+│
+├── docs/                      # Project documentation
+├── uploads/                   # Temporary file upload directory
 ├── main.py                    # Application entry point
 └── requirements.txt           # Python dependencies
 ```
 
-## 🚀 Cài đặt và chạy
+## Installation and Setup
 
-### Yêu cầu hệ thống
+### System Requirements
 
-- Python 3.8+
-- pip
-- Webcam (cho xác thực khuôn mặt)
+- Python 3.8 or higher
+- pip package manager
+- Webcam for facial verification functionality
 
-### Cài đặt
+### Installation Steps
 
-1. **Clone repository:**
+1. **Clone the repository:**
 ```bash
 git clone <repository-url>
 cd Laos_Agent
 ```
 
-2. **Cài đặt dependencies:**
+2. **Install dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Cấu hình environment:**
+3. **Configure environment variables:**
 ```bash
 cp .env.example .env
-# Chỉnh sửa .env với API keys và cấu hình của bạn
+# Edit .env with your API keys and configuration settings
 ```
 
-4. **Chạy ứng dụng:**
+4. **Run the application:**
 ```bash
 python main.py
 ```
 
-Hoặc sử dụng script run.py:
+Alternatively, use the run script:
 ```bash
 python run.py
 ```
 
-### Truy cập ứng dụng
+### Accessing the Application
 
-Mở trình duyệt và truy cập: `http://localhost:5001`
+Open your web browser and navigate to: `http://localhost:5001`
 
-## ⚙️ Cấu hình
+## Configuration
 
-### File .env
+### Environment Variables
 
 ```env
-# API Configuration
+# AI API Configuration
 API_KEY=your-api-key-here
 API_URL=https://code.tinasoft.io/api/v1/chat/completions
 MODEL=google/gemini-2.5-flash-lite
@@ -82,143 +85,139 @@ OCR_UPLOAD_URL=http://172.16.12.136:8000/api/v1/ocr/upload-image
 OCR_SCAN_URL=http://172.16.12.136:8000/api/v1/ocr/scan-url
 OCR_WEBSOCKET_URL=ws://127.0.0.1:8000/api/v1/ocr/ws/verify
 
-# Flask Configuration
+# Flask Application Configuration
 FLASK_HOST=0.0.0.0
 FLASK_PORT=5001
 FLASK_DEBUG=False
 FLASK_SECRET_KEY=your-secret-key-here
 
-# Upload Configuration
+# File Upload Configuration
 UPLOAD_FOLDER=uploads
 MAX_CONTENT_LENGTH=16777216  # 16MB
 ```
 
-## 🧪 Testing
+## Testing
 
-### Chạy unit tests:
+### Running Unit Tests
 ```bash
 python -m pytest tests/unit/ -v
 ```
 
-### Chạy integration tests:
+### Running Integration Tests
 ```bash
 python -m pytest tests/integration/ -v
 ```
 
-### Chạy tất cả tests:
+### Running All Tests
 ```bash
 python -m pytest tests/ -v
 ```
 
-## 📁 Mô tả modules
+## Module Documentation
 
-### Backend
+### Backend Modules
 
-#### `backend/config/`
-- **settings.py**: Quản lý cấu hình ứng dụng từ environment variables
-- **__init__.py**: Export settings instance
+#### Configuration Management (`backend/config/`)
+- **settings.py**: Centralized application configuration management from environment variables
+- **__init__.py**: Exports settings instance for application-wide access
 
-#### `backend/models/`
-- **conversation.py**: Models cho chat conversation và messages
-- **verification.py**: Models cho kết quả OCR scan và face verification
-- **__init__.py**: Export tất cả models
+#### Data Models (`backend/models/`)
+- **conversation.py**: Data models for chat conversations and message handling
+- **verification.py**: Models for OCR scan results and facial verification data
+- **__init__.py**: Exports all model classes
 
-#### `backend/services/`
-- **ai_service.py**: Service xử lý AI chatbot và tool calls
-- **ocr_service.py**: Service xử lý OCR upload và scan
-- **face_verification_service.py**: Service xử lý face verification
-- **__init__.py**: Export tất cả services
+#### Service Layer (`backend/services/`)
+- **ai_service.py**: AI chatbot service with tool call management and conversation handling
+- **ocr_service.py**: OCR document processing service for image upload and data extraction
+- **face_verification_service.py**: Facial verification service supporting both batch and real-time modes
+- **__init__.py**: Exports all service classes
 
-#### `backend/core/`
-- **bot.py**: Main bot class orchestrate tất cả services
-- **__init__.py**: Export bot class
+#### Core Business Logic (`backend/core/`)
+- **bot.py**: Main orchestrator class that coordinates all services and handles tool calls
+- **__init__.py**: Exports bot class
 
-#### `backend/api/`
-- **routes.py**: Flask routes và API endpoints
-- **__init__.py**: Export create_app function
+#### API Layer (`backend/api/`)
+- **routes.py**: Flask routes and REST API endpoints
+- **__init__.py**: Exports application factory function
 
-### Frontend
+### Frontend Modules
 
-#### `frontend/services/`
-- **api_service.py**: Service giao tiếp với backend API
-- **chat_service.py**: Service xử lý chat functionality
-- **camera_service.py**: Service xử lý camera operations
-- **websocket_service.py**: Service xử lý WebSocket real-time
-- **__init__.py**: Export tất cả services
+#### Service Layer (`frontend/services/`)
+- **api_service.js**: Service for backend API communication
+- **chat_service.js**: Chat functionality and message handling
+- **camera_service.js**: Camera operations and media stream management
+- **websocket_service.js**: Real-time WebSocket communication service
+- **__init__.py**: Exports all service modules
 
-#### `frontend/utils/`
-- **formatters.py**: Utilities format data (file size, scan results, etc.)
-- **validators.py**: Utilities validate input data
-- **__init__.py**: Export utilities
+#### Utility Functions (`frontend/utils/`)
+- **formatters.js**: Data formatting utilities (file sizes, scan results, etc.)
+- **validators.js**: Input validation utilities
+- **__init__.py**: Exports utility functions
 
-#### `frontend/assets/`
-- **css/style.css**: Stylesheet chính
-- **js/main.js**: JavaScript chính (sẽ được refactor)
+#### Static Assets (`frontend/assets/`)
+- **css/style.css**: Main application stylesheet
+- **js/main.js**: Primary JavaScript application logic (pending refactoring)
 
-### Tests
+### Test Suite
 
-#### `tests/unit/`
-- **test_models.py**: Unit tests cho data models
+#### Unit Tests (`tests/unit/`)
+- **test_models.py**: Unit tests for data models and validation
 
-#### `tests/integration/`
-- **test_api.py**: Integration tests cho API endpoints
+#### Integration Tests (`tests/integration/`)
+- **test_api.py**: Integration tests for API endpoints and workflows
 
-## 🔧 API Endpoints
+## API Reference
 
-### Chat
-- `POST /chat` - Gửi tin nhắn chat
-- `POST /reset` - Reset conversation
+### Chat Endpoints
+- `POST /chat` - Send chat message and receive AI response
+- `POST /reset` - Reset conversation history
 
-### File Upload
-- `POST /upload` - Upload file ảnh
+### File Upload Endpoints
+- `POST /upload` - Upload image file for processing
 
-### Face Verification
-- `POST /verify-face` - Xác thực khuôn mặt batch
-- `POST /verify-face-realtime` - Xác thực khuôn mặt real-time
-- `POST /start-websocket-verification` - Bắt đầu WebSocket verification
-- `POST /send-frame` - Gửi frame cho real-time verification
-- `POST /stop-websocket-verification` - Dừng WebSocket verification
+### Facial Verification Endpoints
+- `POST /verify-face` - Batch facial verification
+- `POST /verify-face-realtime` - Real-time facial verification
+- `POST /start-websocket-verification` - Initialize WebSocket verification session
+- `POST /send-frame` - Send frame data for real-time verification
+- `POST /stop-websocket-verification` - Terminate WebSocket verification session
 
-### Debug
-- `GET /debug` - Debug information
-- `GET /` - Main page
+### Debug Endpoints
+- `GET /debug` - Application debug information
+- `GET /` - Main application page
 
-## 🛠️ Development
+## Development Guidelines
 
-### Cấu trúc code
+### Code Architecture Principles
 
-1. **Separation of Concerns**: Mỗi module có trách nhiệm riêng biệt
-2. **Dependency Injection**: Services được inject vào core modules
-3. **Configuration Management**: Tất cả config được quản lý tập trung
-4. **Error Handling**: Xử lý lỗi consistent across modules
-5. **Testing**: Unit và integration tests cho tất cả modules
+1. **Separation of Concerns**: Each module maintains distinct responsibilities
+2. **Dependency Injection**: Services are injected into core modules for loose coupling
+3. **Configuration Management**: Centralized configuration handling across all modules
+4. **Error Handling**: Consistent error handling patterns throughout the application
+5. **Testing**: Comprehensive unit and integration test coverage for all modules
 
-### Thêm features mới
+### Adding New Features
 
-1. **Backend**: Thêm service mới trong `backend/services/`, tạo models trong `backend/models/`
-2. **Frontend**: Thêm service mới trong `frontend/services/`, components trong `frontend/components/`
-3. **API**: Thêm routes mới trong `backend/api/routes.py`
-4. **Tests**: Thêm tests tương ứng trong `tests/`
+1. **Backend Development**: Add new services in `backend/services/`, create corresponding models in `backend/models/`
+2. **Frontend Development**: Add new services in `frontend/services/`, create components in `frontend/components/`
+3. **API Development**: Add new routes in `backend/api/routes.py`
+4. **Testing**: Add corresponding tests in the `tests/` directory
 
-### Code Style
+### Code Style Standards
 
-- Sử dụng type hints
-- Docstrings cho tất cả functions/classes
-- Error handling với try/catch
-- Consistent naming conventions
+- Use type hints for all function parameters and return values
+- Include comprehensive docstrings for all functions and classes
+- Implement proper error handling with try/catch blocks
+- Follow consistent naming conventions throughout the codebase
 
-## 📝 License
+## Contributing
 
-MIT License
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to your branch
+5. Create a Pull Request
 
-## 🤝 Contributing
+## Support
 
-1. Fork repository
-2. Tạo feature branch
-3. Commit changes
-4. Push to branch
-5. Tạo Pull Request
-
-## 📞 Support
-
-Liên hệ team development để được hỗ trợ.
+For technical support and questions, please contact the development team.
