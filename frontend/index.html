@@ -1,270 +1,226 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hệ thống eKYC Căn cước công dân Lào</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}?v=1.1"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
-  </head>
 
-  <body>
-    <div class="chat-container">
-      <!-- Header -->
-      <div class="chat-header">
-        <div class="header-content">
-          <div class="bot-avatar">
-            <i class="fas fa-robot"></i>
-          </div>
-          <div class="header-info">
-            <h3>Hệ thống eKYC Căn cước công dân Lào</h3>
-            <span class="status">
-              <span class="status-dot"></span>
-              Đang hoạt động
-            </span>
-          </div>
-          <div class="header-actions">
-            <button class="action-btn" title="Làm mới cuộc trò chuyện">
-              <i class="fas fa-refresh"></i>
-            </button>
-            <button class="action-btn" title="Cài đặt">
-              <i class="fas fa-cog"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ thống eKYC Căn cước công dân Lào</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+</head>
 
-      <!-- Chat Messages -->
-      <div id="chat-box" class="chat-messages">
-        <div class="welcome-message">
-          <div class="bot-message">
-            <div class="message-avatar">
-              <i class="fas fa-robot"></i>
-            </div>
-            <div class="message-content">
-              <div class="message-bubble bot-bubble">
-                <div class="welcome-text">
-                  <h4>👋 Xin chào! Chào mừng bạn đến với Hệ thống eKYC</h4>
-                  <p>
-                    Tôi là trợ lý AI hỗ trợ eKYC căn cước công dân Lào. Tôi có
-                    thể giúp bạn:
-                  </p>
-                  <ul>
-                    <li>📷 Upload và xử lý ảnh căn cước công dân</li>
-                    <li>🔍 Trích xuất thông tin từ ảnh</li>
-                    <li>💬 Trò chuyện về các vấn đề eKYC</li>
-                    <li>❓ Giải đáp thắc mắc về định danh điện tử</li>
-                  </ul>
-                  <p>Bạn cần hỗ trợ gì hôm nay?</p>
-                </div>
-              </div>
-              <div class="message-time">Vừa xong</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Typing Indicator -->
-      <div id="typing-indicator" class="typing-indicator" style="display: none">
-        <div class="message-avatar">
+<body>
+  <div class="chat-container">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-content">
+        <div class="bot-avatar">
           <i class="fas fa-robot"></i>
         </div>
-        <div class="typing-dots">
-          <span></span>
-          <span></span>
-          <span></span>
+        <div class="header-info">
+          <h3>Hệ thống eKYC Căn cước công dân Lào</h3>
+          <span class="status">
+            <span class="status-dot"></span>
+            Đang hoạt động
+          </span>
         </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="quick-actions" id="quick-actions">
-        <div
-          class="quick-action-item"
-          data-message="Tôi muốn upload ảnh căn cước công dân để eKYC"
-        >
-          <i class="fas fa-id-card"></i>
-          <span>Upload ảnh căn cước</span>
+        <div class="header-actions">
+          <button class="action-btn" title="Làm mới cuộc trò chuyện">
+            <i class="fas fa-refresh"></i>
+          </button>
+          <button class="action-btn" title="Cài đặt">
+            <i class="fas fa-cog"></i>
+          </button>
         </div>
-        <div class="quick-action-item" data-action="camera-test">
-          <i class="fas fa-camera"></i>
-          <span>Test Camera</span>
-        </div>
-        <div
-          class="quick-action-item"
-          data-message="Tôi muốn biết thông tin về eKYC"
-        >
-          <i class="fas fa-info-circle"></i>
-          <span>Thông tin eKYC</span>
-        </div>
-        <div
-          class="quick-action-item"
-          data-message="Tôi muốn hỗ trợ về định danh điện tử"
-        >
-          <i class="fas fa-user-check"></i>
-          <span>Hỗ trợ định danh</span>
-        </div>
-        <div
-          class="quick-action-item"
-          data-message="Tôi có câu hỏi về căn cước công dân Lào"
-        >
-          <i class="fas fa-question-circle"></i>
-          <span>Câu hỏi thường gặp</span>
-        </div>
-      </div>
-
-      <!-- Input Form -->
-      <div class="chat-input-container">
-        <form id="chat-form" class="chat-form">
-          <div class="input-wrapper">
-            <button
-              type="button"
-              class="attachment-btn"
-              title="Upload ảnh căn cước"
-              id="upload-btn"
-            >
-              <i class="fas fa-camera"></i>
-            </button>
-            <input
-              type="text"
-              id="user-input"
-              placeholder="Nhập tin nhắn..."
-              autocomplete="off"
-              required
-            />
-            <button type="button" class="emoji-btn" title="Emoji">
-              <i class="fas fa-smile"></i>
-            </button>
-            <button type="submit" id="send-button">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
-        </form>
       </div>
     </div>
 
-    <!-- Camera Modal -->
-    <div id="cameraModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3><i class="fas fa-camera"></i> Xác thực khuôn mặt</h3>
-          <span class="close" id="closeCamera">&times;</span>
-        </div>
-        <div class="modal-body">
-          <p id="cameraMessage">Vui lòng xác thực khuôn mặt bằng camera</p>
-
-          <div class="camera-container">
-            <video id="cameraVideo" autoplay muted playsinline></video>
-            <canvas id="cameraCanvas" style="display: none"></canvas>
+    <!-- Chat Messages -->
+    <div id="chat-box" class="chat-messages">
+      <div class="welcome-message">
+        <div class="bot-message">
+          <div class="message-avatar">
+            <i class="fas fa-robot"></i>
           </div>
-
-           <div class="camera-controls">
-             <button id="startVerifyBtn" class="btn btn-primary">
-               <i class="fas fa-play"></i> Bắt đầu xác thực
-             </button>
-             <button id="stopVerifyBtn" class="btn btn-danger" style="display: none;">
-               <i class="fas fa-stop"></i> Dừng xác thực
-             </button>
-           </div>
-
-           <div id="realtimeResult" class="realtime-result" style="display: none;">
-             <div class="verification-status">
-               <span id="verificationStatus" class="status-text">Đang xác thực...</span>
-               <div id="similarityBar" class="similarity-bar">
-                 <div id="similarityFill" class="similarity-fill"></div>
-                 <span id="similarityText" class="similarity-text">0%</span>
-               </div>
-             </div>
-             <div class="verification-message">
-               <p id="verificationMessage">Vui lòng nhìn thẳng vào camera</p>
-             </div>
-           </div>
-
-          <div id="cameraLoading" class="loading" style="display: none">
-            <div class="spinner"></div>
-            <p>Đang xác thực khuôn mặt...</p>
+          <div class="message-content">
+            <div class="message-bubble bot-bubble">
+              <div class="welcome-text">
+                <h4>👋 Xin chào! Chào mừng bạn đến với Hệ thống eKYC</h4>
+                <p>
+                  Tôi là trợ lý AI hỗ trợ eKYC căn cước công dân Lào. Tôi có
+                  thể giúp bạn:
+                </p>
+                <ul>
+                  <li>📷 Upload và xử lý ảnh căn cước công dân</li>
+                  <li>🔍 Trích xuất thông tin từ ảnh</li>
+                  <li>💬 Trò chuyện về các vấn đề eKYC</li>
+                  <li>❓ Giải đáp thắc mắc về định danh điện tử</li>
+                </ul>
+                <p>Bạn cần hỗ trợ gì hôm nay?</p>
+              </div>
+            </div>
+            <div class="message-time">Vừa xong</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Upload Modal -->
-    <div class="modal-overlay" id="uploadModal" style="display: none">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>
-            <i class="fas fa-cloud-upload-alt"></i> Upload ảnh căn cước công dân
-          </h3>
-          <button class="modal-close" id="closeModal">
-            <i class="fas fa-times"></i>
+    <!-- Typing Indicator -->
+    <div id="typing-indicator" class="typing-indicator" style="display: none">
+      <div class="message-avatar">
+        <i class="fas fa-robot"></i>
+      </div>
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions" id="quick-actions">
+      <div class="quick-action-item" data-message="Tôi muốn upload ảnh căn cước công dân để eKYC">
+        <i class="fas fa-id-card"></i>
+        <span>Upload ảnh căn cước</span>
+      </div>
+      <div class="quick-action-item" data-action="camera-test">
+        <i class="fas fa-camera"></i>
+        <span>Test Camera</span>
+      </div>
+      <div class="quick-action-item" data-message="Tôi muốn biết thông tin về eKYC">
+        <i class="fas fa-info-circle"></i>
+        <span>Thông tin eKYC</span>
+      </div>
+      <div class="quick-action-item" data-message="Tôi muốn hỗ trợ về định danh điện tử">
+        <i class="fas fa-user-check"></i>
+        <span>Hỗ trợ định danh</span>
+      </div>
+      <div class="quick-action-item" data-message="Tôi có câu hỏi về căn cước công dân Lào">
+        <i class="fas fa-question-circle"></i>
+        <span>Câu hỏi thường gặp</span>
+      </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="chat-input-container">
+      <form id="chat-form" class="chat-form">
+        <div class="input-wrapper">
+          <button type="button" class="attachment-btn" title="Upload ảnh căn cước" id="upload-btn">
+            <i class="fas fa-camera"></i>
+          </button>
+          <input type="text" id="user-input" placeholder="Nhập tin nhắn..." autocomplete="off" required />
+          <button type="button" class="emoji-btn" title="Emoji">
+            <i class="fas fa-smile"></i>
+          </button>
+          <button type="submit" id="send-button">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Camera Modal -->
+  <div id="cameraModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-camera"></i> Xác thực khuôn mặt</h3>
+        <span class="close" id="closeCamera">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p id="cameraMessage">Vui lòng xác thực khuôn mặt bằng camera</p>
+
+        <div class="camera-container">
+          <video id="cameraVideo" autoplay muted playsinline></video>
+          <canvas id="cameraCanvas" style="display: none"></canvas>
+        </div>
+
+        <div class="camera-controls">
+          <button id="startVerifyBtn" class="btn btn-primary">
+            <i class="fas fa-play"></i> Bắt đầu xác thực
+          </button>
+          <button id="stopVerifyBtn" class="btn btn-danger" style="display: none;">
+            <i class="fas fa-stop"></i> Dừng xác thực
           </button>
         </div>
 
-        <div class="modal-body">
-          <div class="modal-message" id="modalMessage">
-            Vui lòng upload ảnh căn cước công dân của bạn
-          </div>
-
-          <div class="modal-upload-area" id="modalUploadArea">
-            <div class="modal-upload-content">
-              <i class="fas fa-cloud-upload-alt modal-upload-icon"></i>
-              <h4>Kéo thả ảnh vào đây hoặc click để chọn file</h4>
-              <p>Hỗ trợ: PNG, JPG, JPEG, GIF, BMP, WEBP (Tối đa 16MB)</p>
-              <button
-                type="button"
-                class="modal-upload-btn"
-                id="modalUploadBtn"
-              >
-                <i class="fas fa-plus"></i> Chọn ảnh
-              </button>
-            </div>
-            <input
-              type="file"
-              id="modalFileInput"
-              accept="image/*"
-              style="display: none"
-            />
-          </div>
-
-          <div class="modal-preview" id="modalPreview" style="display: none">
-            <div class="modal-preview-container">
-              <img id="modalPreviewImage" src="" alt="Preview" />
-              <div class="modal-preview-info">
-                <h5 id="modalFileName"></h5>
-                <p id="modalFileSize"></p>
-                <div class="modal-actions">
-                  <button
-                    type="button"
-                    class="modal-process-btn"
-                    id="modalProcessBtn"
-                  >
-                    <i class="fas fa-cog"></i> Xử lý ảnh
-                  </button>
-                  <button
-                    type="button"
-                    class="modal-cancel-btn"
-                    id="modalCancelBtn"
-                  >
-                    <i class="fas fa-times"></i> Hủy
-                  </button>
-                </div>
-              </div>
+        <div id="realtimeResult" class="realtime-result" style="display: none;">
+          <div class="verification-status">
+            <span id="verificationStatus" class="status-text">Đang xác thực...</span>
+            <div id="similarityBar" class="similarity-bar">
+              <div id="similarityFill" class="similarity-fill"></div>
+              <span id="similarityText" class="similarity-text">0%</span>
             </div>
           </div>
-
-          <div class="modal-loading" id="modalLoading" style="display: none">
-            <div class="modal-loading-spinner"></div>
-            <p>Đang xử lý ảnh...</p>
+          <div class="verification-message">
+            <p id="verificationMessage">Vui lòng nhìn thẳng vào camera</p>
           </div>
+        </div>
+
+        <div id="cameraLoading" class="loading" style="display: none">
+          <div class="spinner"></div>
+          <p>Đang xác thực khuôn mặt...</p>
         </div>
       </div>
     </div>
+  </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  </body>
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="uploadModal" style="display: none">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>
+          <i class="fas fa-cloud-upload-alt"></i> Upload ảnh căn cước công dân
+        </h3>
+        <button class="modal-close" id="closeModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-message" id="modalMessage">
+          Vui lòng upload ảnh căn cước công dân của bạn
+        </div>
+
+        <div class="modal-upload-area" id="modalUploadArea">
+          <div class="modal-upload-content">
+            <i class="fas fa-cloud-upload-alt modal-upload-icon"></i>
+            <h4>Kéo thả ảnh vào đây hoặc click để chọn file</h4>
+            <p>Hỗ trợ: PNG, JPG, JPEG, GIF, BMP, WEBP (Tối đa 16MB)</p>
+            <button type="button" class="modal-upload-btn" id="modalUploadBtn">
+              <i class="fas fa-plus"></i> Chọn ảnh
+            </button>
+          </div>
+          <input type="file" id="modalFileInput" accept="image/*" style="display: none" />
+        </div>
+
+        <div class="modal-preview" id="modalPreview" style="display: none">
+          <div class="modal-preview-container">
+            <img id="modalPreviewImage" src="" alt="Preview" />
+            <div class="modal-preview-info">
+              <h5 id="modalFileName"></h5>
+              <p id="modalFileSize"></p>
+              <div class="modal-actions">
+                <button type="button" class="modal-process-btn" id="modalProcessBtn">
+                  <i class="fas fa-cog"></i> Xử lý ảnh
+                </button>
+                <button type="button" class="modal-cancel-btn" id="modalCancelBtn">
+                  <i class="fas fa-times"></i> Hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-loading" id="modalLoading" style="display: none">
+          <div class="modal-loading-spinner"></div>
+          <p>Đang xử lý ảnh...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
 </html>
