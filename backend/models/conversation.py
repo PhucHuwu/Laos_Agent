@@ -42,6 +42,7 @@ class Conversation:
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     context: Dict[str, Any] = field(default_factory=dict)  # Lưu trữ context và dữ liệu
+    progress: str = "idle"  # Theo dõi tiến trình eKYC: idle, id_uploaded, id_scanned, face_verifying, completed
 
     def add_message(self, message: Message) -> None:
         """Add a message to the conversation"""
@@ -81,3 +82,35 @@ class Conversation:
     def get_id_card_url(self) -> Optional[str]:
         """Get ID card URL from context"""
         return self.context.get('id_card_url')
+
+    def clear_ekyc_context(self) -> None:
+        """Clear eKYC-related context data (ID card URL, scan result, verification result)"""
+        keys_to_remove = ['id_card_url', 'scan_result', 'verification_result', 'verification_success']
+        for key in keys_to_remove:
+            if key in self.context:
+                del self.context[key]
+        self.progress = "idle"  # Reset progress
+        self.updated_at = datetime.now()
+
+    def set_progress(self, progress: str) -> None:
+        """Set eKYC progress"""
+        valid_progress = ["idle", "id_uploaded", "id_scanned", "face_verifying", "completed"]
+        if progress in valid_progress:
+            self.progress = progress
+            self.updated_at = datetime.now()
+        else:
+            raise ValueError(f"Invalid progress value. Must be one of: {', '.join(valid_progress)}")
+
+    def get_progress(self) -> str:
+        """Get current eKYC progress"""
+        return self.progress
+
+    def get_progress_summary(self) -> Dict[str, Any]:
+        """Get summary of current progress and context"""
+        return {
+            "progress": self.progress,
+            "has_id_card": self.has_id_card_data(),
+            "id_card_url": self.get_id_card_url(),
+            "has_scan_result": self.context.get('scan_result') is not None,
+            "verification_completed": self.context.get('verification_success', False)
+        }

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="lo">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hệ thống eKYC Căn cước công dân Lào</title>
+  <title>ລະບົບ eKYC ບັດປະຈໍາຕົວ ສປປ ລາວ</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 </head>
@@ -18,19 +18,11 @@
           <i class="fas fa-robot"></i>
         </div>
         <div class="header-info">
-          <h3>Hệ thống eKYC Căn cước công dân Lào</h3>
+          <h3>ລະບົບ eKYC ບັດປະຈໍາຕົວ ສປປ ລາວ</h3>
           <span class="status">
             <span class="status-dot"></span>
-            Đang hoạt động
+            ກຳລັງເຮັດວຽກ
           </span>
-        </div>
-        <div class="header-actions">
-          <button class="action-btn" title="Làm mới cuộc trò chuyện">
-            <i class="fas fa-refresh"></i>
-          </button>
-          <button class="action-btn" title="Cài đặt">
-            <i class="fas fa-cog"></i>
-          </button>
         </div>
       </div>
     </div>
@@ -45,21 +37,20 @@
           <div class="message-content">
             <div class="message-bubble bot-bubble">
               <div class="welcome-text">
-                <h4>👋 Xin chào! Chào mừng bạn đến với Hệ thống eKYC</h4>
+                <h4>👋 ສະບາຍດີ! ຍິນດີຕ້ອນຮັບສູ່ລະບົບ eKYC</h4>
                 <p>
-                  Tôi là trợ lý AI hỗ trợ eKYC căn cước công dân Lào. Tôi có
-                  thể giúp bạn:
+                  ຂ້ອຍແມ່ນຜູ້ຊ່ວຍ AI ສຳລັບ eKYC ບັດປະຈໍາຕົວ ສປປ ລາວ. ຂ້ອຍສາມາດຊ່ວຍທ່ານໄດ້:
                 </p>
                 <ul>
-                  <li>📷 Upload và xử lý ảnh căn cước công dân</li>
-                  <li>🔍 Trích xuất thông tin từ ảnh</li>
-                  <li>💬 Trò chuyện về các vấn đề eKYC</li>
-                  <li>❓ Giải đáp thắc mắc về định danh điện tử</li>
+                  <li>📷 ອັບໂຫຼດ ແລະ ປຸງແຕ່ງຮູບບັດປະຈໍາຕົວ</li>
+                  <li>🔍 ສະກັດຂໍ້ມູນຈາກຮູບ</li>
+                  <li>💬 ສົນທະນາກ່ຽວກັບບັນຫາ eKYC</li>
+                  <li>❓ ຕອບຄຳຖາມກ່ຽວກັບການຢັ້ງຢືນຕົວຕົນດິຈິຕອນ</li>
                 </ul>
-                <p>Bạn cần hỗ trợ gì hôm nay?</p>
+                <p>ມື້ນີ້ທ່ານຕ້ອງການຄວາມຊ່ວຍເຫຼືອແນວໃດ?</p>
               </div>
             </div>
-            <div class="message-time">Vừa xong</div>
+            <div class="message-time">ຫາກໍ່ນີ້</div>
           </div>
         </div>
       </div>
@@ -79,25 +70,21 @@
 
     <!-- Quick Actions -->
     <div class="quick-actions" id="quick-actions">
-      <div class="quick-action-item" data-message="Tôi muốn upload ảnh căn cước công dân để eKYC">
+      <div class="quick-action-item" data-message="ຂ້ອຍຕ້ອງການເຮັດການກຳນົດຕົວຕົນທາງເອເລັກໂທຣນິກ">
         <i class="fas fa-id-card"></i>
-        <span>Upload ảnh căn cước</span>
+        <span>ເຮັດ eKYC</span>
       </div>
-      <div class="quick-action-item" data-action="camera-test">
-        <i class="fas fa-camera"></i>
-        <span>Test Camera</span>
-      </div>
-      <div class="quick-action-item" data-message="Tôi muốn biết thông tin về eKYC">
-        <i class="fas fa-info-circle"></i>
-        <span>Thông tin eKYC</span>
-      </div>
-      <div class="quick-action-item" data-message="Tôi muốn hỗ trợ về định danh điện tử">
+      <div class="quick-action-item" data-message="ຂ້ອຍຕ້ອງການຢັ້ງຢືນໃບໜ້າ">
         <i class="fas fa-user-check"></i>
-        <span>Hỗ trợ định danh</span>
+        <span>ຢັ້ງຢືນໃບໜ້າ</span>
       </div>
-      <div class="quick-action-item" data-message="Tôi có câu hỏi về căn cước công dân Lào">
-        <i class="fas fa-question-circle"></i>
-        <span>Câu hỏi thường gặp</span>
+      <div class="quick-action-item" data-message="ການກຳນົດຕົວຕົນທາງເອເລັກໂທຣນິກ (eKYC) ແມ່ນຫຍັງ?">
+        <i class="fas fa-info-circle"></i>
+        <span>eKYC ແມ່ນຫຍັງ?</span>
+      </div>
+      <div class="quick-action-item" data-message="ການກຳນົດຕົວຕົນທາງເອເລັກໂທຣນິກມີຈັກຂັ້ນຕອນ?">
+        <i class="fas fa-list-ol"></i>
+        <span>ມີຈັກຂັ້ນຕອນ?</span>
       </div>
     </div>
 
@@ -105,10 +92,10 @@
     <div class="chat-input-container">
       <form id="chat-form" class="chat-form">
         <div class="input-wrapper">
-          <button type="button" class="attachment-btn" title="Upload ảnh căn cước" id="upload-btn">
+          <button type="button" class="attachment-btn" title="ອັບໂຫຼດຮູບບັດປະຈໍາຕົວ" id="upload-btn">
             <i class="fas fa-camera"></i>
           </button>
-          <input type="text" id="user-input" placeholder="Nhập tin nhắn..." autocomplete="off" required />
+          <input type="text" id="user-input" placeholder="ພິມຂໍ້ຄວາມ..." autocomplete="off" required />
           <button type="button" class="emoji-btn" title="Emoji">
             <i class="fas fa-smile"></i>
           </button>
@@ -124,11 +111,11 @@
   <div id="cameraModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3><i class="fas fa-camera"></i> Xác thực khuôn mặt</h3>
+        <h3><i class="fas fa-camera"></i> ຢັ້ງຢືນໃບໜ້າ</h3>
         <span class="close" id="closeCamera">&times;</span>
       </div>
       <div class="modal-body">
-        <p id="cameraMessage">Vui lòng xác thực khuôn mặt bằng camera</p>
+        <p id="cameraMessage">ກະລຸນາຢັ້ງຢືນໃບໜ້າດ້ວຍກ້ອງຖ່າຍຮູບ</p>
 
         <div class="camera-container">
           <video id="cameraVideo" autoplay muted playsinline></video>
@@ -137,29 +124,29 @@
 
         <div class="camera-controls">
           <button id="startVerifyBtn" class="btn btn-primary">
-            <i class="fas fa-play"></i> Bắt đầu xác thực
+            <i class="fas fa-play"></i> ເລີ່ມຢັ້ງຢືນ
           </button>
           <button id="stopVerifyBtn" class="btn btn-danger" style="display: none;">
-            <i class="fas fa-stop"></i> Dừng xác thực
+            <i class="fas fa-stop"></i> ຢຸດຢັ້ງຢືນ
           </button>
         </div>
 
         <div id="realtimeResult" class="realtime-result" style="display: none;">
           <div class="verification-status">
-            <span id="verificationStatus" class="status-text">Đang xác thực...</span>
+            <span id="verificationStatus" class="status-text">ກຳລັງຢັ້ງຢືນ...</span>
             <div id="similarityBar" class="similarity-bar">
               <div id="similarityFill" class="similarity-fill"></div>
               <span id="similarityText" class="similarity-text">0%</span>
             </div>
           </div>
           <div class="verification-message">
-            <p id="verificationMessage">Vui lòng nhìn thẳng vào camera</p>
+            <p id="verificationMessage">ກະລຸນາເບິ່ງກ້ອງໂດຍກົງ</p>
           </div>
         </div>
 
         <div id="cameraLoading" class="loading" style="display: none">
           <div class="spinner"></div>
-          <p>Đang xác thực khuôn mặt...</p>
+          <p>ກຳລັງຢັ້ງຢືນໃບໜ້າ...</p>
         </div>
       </div>
     </div>
@@ -170,7 +157,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3>
-          <i class="fas fa-cloud-upload-alt"></i> Upload ảnh căn cước công dân
+          <i class="fas fa-cloud-upload-alt"></i> ອັບໂຫຼດຮູບບັດປະຈໍາຕົວ
         </h3>
         <button class="modal-close" id="closeModal">
           <i class="fas fa-times"></i>
@@ -179,16 +166,16 @@
 
       <div class="modal-body">
         <div class="modal-message" id="modalMessage">
-          Vui lòng upload ảnh căn cước công dân của bạn
+          ກະລຸນາອັບໂຫຼດຮູບບັດປະຈໍາຕົວຂອງທ່ານ
         </div>
 
         <div class="modal-upload-area" id="modalUploadArea">
           <div class="modal-upload-content">
             <i class="fas fa-cloud-upload-alt modal-upload-icon"></i>
-            <h4>Kéo thả ảnh vào đây hoặc click để chọn file</h4>
-            <p>Hỗ trợ: PNG, JPG, JPEG, GIF, BMP, WEBP (Tối đa 16MB)</p>
+            <h4>ລາກວາງຮູບໃສ່ບ່ອນນີ້ ຫຼື ຄລິກເພື່ອເລືອກໄຟລ໌</h4>
+            <p>ຮອງຮັບ: PNG, JPG, JPEG, GIF, BMP, WEBP (ສູງສຸດ 16MB)</p>
             <button type="button" class="modal-upload-btn" id="modalUploadBtn">
-              <i class="fas fa-plus"></i> Chọn ảnh
+              <i class="fas fa-plus"></i> ເລືອກຮູບ
             </button>
           </div>
           <input type="file" id="modalFileInput" accept="image/*" style="display: none" />
@@ -202,10 +189,10 @@
               <p id="modalFileSize"></p>
               <div class="modal-actions">
                 <button type="button" class="modal-process-btn" id="modalProcessBtn">
-                  <i class="fas fa-cog"></i> Xử lý ảnh
+                  <i class="fas fa-cog"></i> ປຸງແຕ່ງຮູບ
                 </button>
                 <button type="button" class="modal-cancel-btn" id="modalCancelBtn">
-                  <i class="fas fa-times"></i> Hủy
+                  <i class="fas fa-times"></i> ຍົກເລີກ
                 </button>
               </div>
             </div>
@@ -214,13 +201,13 @@
 
         <div class="modal-loading" id="modalLoading" style="display: none">
           <div class="modal-loading-spinner"></div>
-          <p>Đang xử lý ảnh...</p>
+          <p>ກຳລັງປຸງແຕ່ງຮູບ...</p>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}?v=1.3"></script>
 </body>
 
 </html>

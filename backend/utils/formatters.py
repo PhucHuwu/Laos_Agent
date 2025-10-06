@@ -22,54 +22,54 @@ def format_file_size(bytes_size: int) -> str:
 def format_lao_cccd_result(ocr_result: Dict[str, Any]) -> str:
     """Format OCR result for Lao CCCD to beautiful HTML display"""
     if not ocr_result:
-        return "<p>Không có dữ liệu căn cước</p>"
+        return "<p>ບໍ່ມີຂໍ້ມູນບັດປະຈໍາຕົວ</p>"
 
     html = '<div class="lao-cccd-result">'
 
     # Header với tên tài liệu
     html += '<div class="cccd-header">'
-    html += f'<h3><i class="fas fa-id-card"></i> {ocr_result.get("display_name", "Căn cước công dân Lào")}</h3>'
+    html += f'<h3><i class="fas fa-id-card"></i>ບັດປະຈໍາຕົວ ສປປ ລາວ</h3>'
     html += '</div>'
 
     # Thông tin cá nhân chính
     fields = ocr_result.get('fields', {})
     if fields:
         html += '<div class="cccd-section">'
-        html += '<h4><i class="fas fa-user"></i> Thông tin cá nhân</h4>'
+        html += '<h4><i class="fas fa-user"></i> ຂໍ້ມູນສ່ວນຕົວ</h4>'
         html += '<div class="cccd-info-grid">'
 
         # Số căn cước
         if fields.get('id_number'):
             html += '<div class="info-item">'
-            html += '<span class="info-label"><i class="fas fa-hashtag"></i> Số căn cước:</span>'
+            html += '<span class="info-label"><i class="fas fa-hashtag"></i> ເລກບັດປະຈໍາຕົວ:</span>'
             html += f'<span class="info-value">{fields["id_number"]}</span>'
             html += '</div>'
 
         # Họ tên
         if fields.get('fullname'):
             html += '<div class="info-item">'
-            html += '<span class="info-label"><i class="fas fa-signature"></i> Họ và tên:</span>'
+            html += '<span class="info-label"><i class="fas fa-signature"></i> ຊື່ ແລະ ນາມສະກຸນ:</span>'
             html += f'<span class="info-value">{fields["fullname"]}</span>'
             html += '</div>'
 
         # Ngày sinh
         if fields.get('dob'):
             html += '<div class="info-item">'
-            html += '<span class="info-label"><i class="fas fa-birthday-cake"></i> Ngày sinh:</span>'
+            html += '<span class="info-label"><i class="fas fa-birthday-cake"></i> ວັນເດືອນປີເກີດ:</span>'
             html += f'<span class="info-value">{fields["dob"]}</span>'
             html += '</div>'
 
         # Quốc tịch
         if fields.get('nationality'):
             html += '<div class="info-item">'
-            html += '<span class="info-label"><i class="fas fa-flag"></i> Quốc tịch:</span>'
+            html += '<span class="info-label"><i class="fas fa-flag"></i> ສັນຊາດ:</span>'
             html += f'<span class="info-value">{fields["nationality"]}</span>'
             html += '</div>'
 
         # Dân tộc
         if fields.get('ethnicity'):
             html += '<div class="info-item">'
-            html += '<span class="info-label"><i class="fas fa-users"></i> Dân tộc:</span>'
+            html += '<span class="info-label"><i class="fas fa-users"></i> ຊົນເຜົ່າ:</span>'
             html += f'<span class="info-value">{fields["ethnicity"]}</span>'
             html += '</div>'
 
@@ -80,13 +80,13 @@ def format_lao_cccd_result(ocr_result: Dict[str, Any]) -> str:
         address = fields.get('address', {})
         if address:
             html += '<div class="cccd-section">'
-            html += '<h4><i class="fas fa-map-marker-alt"></i> Địa chỉ</h4>'
+            html += '<h4><i class="fas fa-map-marker-alt"></i> ທີ່ຢູ່</h4>'
             html += '<div class="cccd-info-grid">'
 
             # Địa chỉ đầy đủ
             if address.get('address'):
                 html += '<div class="info-item full-width">'
-                html += '<span class="info-label"><i class="fas fa-home"></i> Địa chỉ:</span>'
+                html += '<span class="info-label"><i class="fas fa-home"></i> ທີ່ຢູ່:</span>'
                 html += f'<span class="info-value">{address["address"]}</span>'
                 html += '</div>'
 
@@ -95,19 +95,19 @@ def format_lao_cccd_result(ocr_result: Dict[str, Any]) -> str:
             if children:
                 if children.get('address_village'):
                     html += '<div class="info-item">'
-                    html += '<span class="info-label"><i class="fas fa-building"></i> Thôn/Bản:</span>'
+                    html += '<span class="info-label"><i class="fas fa-building"></i> ບ້ານ:</span>'
                     html += f'<span class="info-value">{children["address_village"]}</span>'
                     html += '</div>'
 
                 if children.get('address_district'):
                     html += '<div class="info-item">'
-                    html += '<span class="info-label"><i class="fas fa-map"></i> Huyện:</span>'
+                    html += '<span class="info-label"><i class="fas fa-map"></i> ເມືອງ:</span>'
                     html += f'<span class="info-value">{children["address_district"]}</span>'
                     html += '</div>'
 
                 if children.get('address_province'):
                     html += '<div class="info-item">'
-                    html += '<span class="info-label"><i class="fas fa-city"></i> Tỉnh:</span>'
+                    html += '<span class="info-label"><i class="fas fa-city"></i> ແຂວງ:</span>'
                     html += f'<span class="info-value">{children["address_province"]}</span>'
                     html += '</div>'
 
@@ -116,18 +116,18 @@ def format_lao_cccd_result(ocr_result: Dict[str, Any]) -> str:
 
         # Thông tin thời hạn
         html += '<div class="cccd-section">'
-        html += '<h4><i class="fas fa-calendar-alt"></i> Thông tin thời hạn</h4>'
+        html += '<h4><i class="fas fa-calendar-alt"></i> ຂໍ້ມູນໄລຍະເວລາ</h4>'
         html += '<div class="cccd-info-grid">'
 
         if fields.get('issue_date'):
             html += '<div class="info-item">'
-            html += '<span class="info-label"><i class="fas fa-calendar-plus"></i> Ngày cấp:</span>'
+            html += '<span class="info-label"><i class="fas fa-calendar-plus"></i> ວັນອອກບັດ:</span>'
             html += f'<span class="info-value">{fields["issue_date"]}</span>'
             html += '</div>'
 
         if fields.get('expiry_date'):
             html += '<div class="info-item">'
-            html += '<span class="info-label"><i class="fas fa-calendar-times"></i> Ngày hết hạn:</span>'
+            html += '<span class="info-label"><i class="fas fa-calendar-times"></i> ວັນໝົດອາຍຸ:</span>'
             html += f'<span class="info-value">{fields["expiry_date"]}</span>'
             html += '</div>'
 
@@ -137,16 +137,16 @@ def format_lao_cccd_result(ocr_result: Dict[str, Any]) -> str:
     # Hiển thị ảnh nếu có
     if ocr_result.get('img_url'):
         html += '<div class="cccd-section">'
-        html += '<h4><i class="fas fa-image"></i> Ảnh căn cước</h4>'
+        html += '<h4><i class="fas fa-image"></i> ຮູບບັດປະຈໍາຕົວ</h4>'
         html += '<div class="cccd-image-container">'
-        html += f'<img src="{ocr_result["img_url"]}" alt="Ảnh căn cước công dân" class="cccd-image" />'
+        html += f'<img src="{ocr_result["img_url"]}" alt="ຮູບບັດປະຈໍາຕົວ" class="cccd-image" />'
         html += '</div>'
         html += '</div>'
 
     # Văn bản gốc (nếu cần debug)
     if ocr_result.get('text'):
         html += '<div class="cccd-section">'
-        html += '<h4><i class="fas fa-file-text"></i> Văn bản trích xuất</h4>'
+        html += '<h4><i class="fas fa-file-text"></i> ຂໍ້ຄວາມທີ່ສະກັດໄດ້</h4>'
         html += '<div class="cccd-text-container">'
         # Convert list to string if needed
         text_content = ocr_result["text"]
@@ -163,7 +163,7 @@ def format_lao_cccd_result(ocr_result: Dict[str, Any]) -> str:
 def format_scan_result(scan_result: Dict[str, Any]) -> str:
     """Format OCR scan result to HTML"""
     if not scan_result:
-        return "<p>Không có dữ liệu</p>"
+        return "<p>ບໍ່ມີຂໍ້ມູນ</p>"
 
     # Kiểm tra nếu là căn cước công dân Lào thì sử dụng format chuyên dụng
     if scan_result.get('document_type') == 'lao_cccd':
@@ -173,15 +173,15 @@ def format_scan_result(scan_result: Dict[str, Any]) -> str:
     html = '<div class="scan-result">'
 
     if scan_result.get('text'):
-        html += f'<h4><i class="fas fa-text-width"></i> Văn bản trích xuất:</h4>'
+        html += f'<h4><i class="fas fa-text-width"></i> ຂໍ້ຄວາມທີ່ສະກັດໄດ້:</h4>'
         html += f'<p class="extracted-text">{scan_result["text"]}</p>'
 
     if scan_result.get('document_type'):
-        html += f'<h4><i class="fas fa-id-card"></i> Loại tài liệu:</h4>'
+        html += f'<h4><i class="fas fa-id-card"></i> ປະເພດເອກະສານ:</h4>'
         html += f'<p class="document-type">{scan_result["document_type"]}</p>'
 
     if scan_result.get('display_name'):
-        html += f'<h4><i class="fas fa-user"></i> Tên hiển thị:</h4>'
+        html += f'<h4><i class="fas fa-user"></i> ຊື່ສະແດງ:</h4>'
         html += f'<p class="display-name">{scan_result["display_name"]}</p>'
 
     # Add other fields
@@ -198,13 +198,13 @@ def format_scan_result(scan_result: Dict[str, Any]) -> str:
 def format_verify_result(verify_result: Dict[str, Any]) -> str:
     """Format face verification result to user-friendly HTML"""
     if not verify_result:
-        return "<p>Không có dữ liệu xác thực</p>"
+        return "<p>ບໍ່ມີຂໍ້ມູນການຢັ້ງຢືນ</p>"
 
     html = '<div class="face-verification-result">'
 
     # Header với icon và tiêu đề
     html += '<div class="verification-header">'
-    html += '<h3><i class="fas fa-user-check"></i> Kết quả xác thực khuôn mặt</h3>'
+    html += '<h3><i class="fas fa-user-check"></i> ຜົນການຢັ້ງຢືນໃບໜ້າ</h3>'
     html += '</div>'
 
     # Xác định trạng thái chính
@@ -227,15 +227,15 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
             html += '<i class="fas fa-check-circle"></i>'
             html += '</div>'
             html += '<div class="success-content">'
-            html += '<h4>✅ Xác thực thành công!</h4>'
-            html += '<p>Khuôn mặt trong ảnh căn cước và ảnh selfie là cùng một người.</p>'
+            html += '<h4>✅ ຢັ້ງຢືນສຳເລັດ!</h4>'
+            html += '<p>ໃບໜ້າໃນຮູບບັດປະຈໍາຕົວ ແລະ ຮູບ selfie ແມ່ນຄົນດຽວກັນ.</p>'
 
             # Hiển thị độ tương đồng một cách thân thiện
             if similarity is not None:
                 similarity_percent = similarity * 100 if similarity <= 1 else similarity
                 html += '<div class="similarity-display">'
                 html += f'<div class="similarity-score">{similarity_percent:.1f}%</div>'
-                html += '<div class="similarity-label">Độ khớp</div>'
+                html += '<div class="similarity-label">ຄວາມຄ້າຍຄືກັນ</div>'
                 html += '</div>'
 
             html += '</div>'
@@ -243,8 +243,8 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
 
             # Thông báo tiếp theo
             html += '<div class="next-steps">'
-            html += '<h5><i class="fas fa-info-circle"></i> Bước tiếp theo:</h5>'
-            html += '<p>Quá trình eKYC của bạn đã hoàn tất thành công! Bạn có thể sử dụng dịch vụ.</p>'
+            html += '<h5><i class="fas fa-info-circle"></i> ຂັ້ນຕອນຕໍ່ໄປ:</h5>'
+            html += '<p>ຂະບວນການ eKYC ຂອງທ່ານສຳເລັດແລ້ວ! ທ່ານສາມາດໃຊ້ບໍລິການໄດ້.</p>'
             html += '</div>'
 
         else:
@@ -254,14 +254,14 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
             html += '<i class="fas fa-times-circle"></i>'
             html += '</div>'
             html += '<div class="failed-content">'
-            html += '<h4>❌ Xác thực không thành công</h4>'
-            html += '<p>Khuôn mặt trong ảnh căn cước và ảnh selfie không khớp nhau.</p>'
+            html += '<h4>❌ ຢັ້ງຢືນບໍ່ສຳເລັດ</h4>'
+            html += '<p>ໃບໜ້າໃນຮູບບັດປະຈໍາຕົວ ແລະ ຮູບ selfie ບໍ່ຕົງກັນ.</p>'
 
             if similarity is not None:
                 similarity_percent = similarity * 100 if similarity <= 1 else similarity
                 html += '<div class="similarity-display">'
                 html += f'<div class="similarity-score low">{similarity_percent:.1f}%</div>'
-                html += '<div class="similarity-label">Độ khớp</div>'
+                html += '<div class="similarity-label">ຄວາມຄ້າຍຄືກັນ</div>'
                 html += '</div>'
 
             html += '</div>'
@@ -269,12 +269,12 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
 
             # Hướng dẫn khắc phục
             html += '<div class="troubleshooting">'
-            html += '<h5><i class="fas fa-lightbulb"></i> Gợi ý khắc phục:</h5>'
+            html += '<h5><i class="fas fa-lightbulb"></i> ຄຳແນະນຳແກ້ໄຂ:</h5>'
             html += '<ul>'
-            html += '<li>Đảm bảo ánh sáng đủ sáng khi chụp ảnh</li>'
-            html += '<li>Nhìn thẳng vào camera, không đeo kính râm</li>'
-            html += '<li>Chụp ảnh selfie với góc độ tương tự như ảnh căn cước</li>'
-            html += '<li>Thử lại với ảnh selfie khác</li>'
+            html += '<li>ໃຫ້ແນ່ໃຈວ່າມີແສງສະຫວ່າງພຽງພໍເວລາຖ່າຍຮູບ</li>'
+            html += '<li>ເບິ່ງກ້ອງໂດຍກົງ, ຢ່າໃສ່ແວ່ນຕາມືດ</li>'
+            html += '<li>ຖ່າຍຮູບ selfie ດ້ວຍມຸມທີ່ຄ້າຍຄືກັບຮູບໃນບັດປະຈໍາຕົວ</li>'
+            html += '<li>ລອງອີກຄັ້ງດ້ວຍຮູບ selfie ໃໝ່</li>'
             html += '</ul>'
             html += '</div>'
     else:
@@ -284,8 +284,8 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
         html += '<i class="fas fa-exclamation-triangle"></i>'
         html += '</div>'
         html += '<div class="error-content">'
-        html += '<h4>⚠️ Không thể xác thực</h4>'
-        html += '<p>Có lỗi xảy ra trong quá trình xác thực khuôn mặt.</p>'
+        html += '<h4>⚠️ ບໍ່ສາມາດຢັ້ງຢືນໄດ້</h4>'
+        html += '<p>ມີຂໍ້ຜິດພາດເກີດຂຶ້ນໃນຂະບວນການຢັ້ງຢືນໃບໜ້າ.</p>'
 
         if verify_result.get('msg'):
             html += f'<div class="error-message">{verify_result["msg"]}</div>'
@@ -295,11 +295,11 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
 
         # Hướng dẫn khắc phục
         html += '<div class="troubleshooting">'
-        html += '<h5><i class="fas fa-tools"></i> Khắc phục sự cố:</h5>'
+        html += '<h5><i class="fas fa-tools"></i> ແກ້ໄຂບັນຫາ:</h5>'
         html += '<ul>'
-        html += '<li>Kiểm tra kết nối internet</li>'
-        html += '<li>Thử lại sau vài phút</li>'
-        html += '<li>Liên hệ hỗ trợ nếu vấn đề tiếp tục</li>'
+        html += '<li>ກວດສອບການເຊື່ອມຕໍ່ອິນເຕີເນັດ</li>'
+        html += '<li>ລອງອີກຄັ້ງໃນອີກສອງສາມນາທີ</li>'
+        html += '<li>ຕິດຕໍ່ຝ່າຍຊ່ວຍເຫຼືອຖ້າບັນຫາສືບຕໍ່ເກີດຂຶ້ນ</li>'
         html += '</ul>'
         html += '</div>'
 
@@ -310,7 +310,7 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
 def format_markdown_to_html(markdown_text: str) -> str:
     """Convert Markdown text to beautiful HTML for chatbot responses"""
     if not markdown_text:
-        return "<p>Không có nội dung</p>"
+        return "<p>ບໍ່ມີເນື້ອຫາ</p>"
 
     html = '<div class="chatbot-response">'
 
@@ -412,7 +412,7 @@ def _process_inline_formatting(text: str) -> str:
 def format_chatbot_response(response_text: str) -> str:
     """Format chatbot response text to clean, readable HTML"""
     if not response_text:
-        return "<p>Không có phản hồi</p>"
+        return "<p>ບໍ່ມີການຕອບກັບ</p>"
 
     # Check if it's already HTML
     if response_text.strip().startswith('<'):

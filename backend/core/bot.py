@@ -111,6 +111,10 @@ class LaosEKYCBot:
         self.conversation.set_context('id_card_url', image_url)
         self.conversation.set_context('scan_result', scan_result.to_dict())
 
+        # Cập nhật progress: đã scan ID card thành công
+        self.conversation.set_progress('id_scanned')
+        print(f"✅ Progress updated: {self.conversation.get_progress()}")
+
         # Return scan result without auto-triggering camera
         # AI will decide when to call camera verification tool
         return {
@@ -123,6 +127,11 @@ class LaosEKYCBot:
     def _handle_verify_face(self, id_card_image_url: str, selfie_image_url: str) -> Dict[str, Any]:
         """Handle face verification"""
         print("🔐 Verifying face...")
+
+        # Cập nhật progress: đang xác thực khuôn mặt
+        self.conversation.set_progress('face_verifying')
+        print(f"✅ Progress updated: {self.conversation.get_progress()}")
+
         verify_result = self.face_verification_service.verify_face_from_urls(
             id_card_image_url, selfie_image_url
         )
@@ -133,13 +142,21 @@ class LaosEKYCBot:
 
             # Check verification result
             if result_data.get("status") == "success" and result_data.get("same_person") == True:
+                # Đánh dấu eKYC đã hoàn tất thành công
+                self.conversation.set_context('verification_success', True)
+                self.conversation.set_progress('completed')
+                print(f"✅ Progress updated: {self.conversation.get_progress()}")
+
                 return {
                     "success": True,
                     "data": result_data,
                     "message": "Face verification successful!"
                 }
             else:
-                # Verification failed, require retry
+                # Verification failed, require retry - quay lại id_scanned
+                self.conversation.set_progress('id_scanned')
+                print(f"⚠️ Verification failed, progress reverted: {self.conversation.get_progress()}")
+
                 return {
                     "success": True,
                     "data": result_data,
@@ -148,6 +165,10 @@ class LaosEKYCBot:
                     "id_card_url": id_card_image_url
                 }
         else:
+            # Error occurred - quay lại id_scanned
+            self.conversation.set_progress('id_scanned')
+            print(f"⚠️ Verification error, progress reverted: {self.conversation.get_progress()}")
+
             return {
                 "success": False,
                 "message": verify_result.get("error", "Error during face verification"),
@@ -205,3 +226,7 @@ class LaosEKYCBot:
     def get_conversation_history(self) -> list:
         """Get conversation history"""
         return self.ai_service.get_conversation_history()
+
+    def clear_ekyc_data(self):
+        """Clear eKYC-related data from conversation context"""
+        self.conversation.clear_ekyc_context()

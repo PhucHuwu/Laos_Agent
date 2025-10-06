@@ -3,3 +3,5 @@
 .cursor
 .github
 __pycache__/
+tests/
+*tests.py

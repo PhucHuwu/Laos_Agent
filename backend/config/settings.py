@@ -16,8 +16,8 @@ class Settings:
     def __init__(self):
         # API Configuration
         self.API_KEY: Optional[str] = os.getenv("API_KEY")
-        self.API_URL: str = os.getenv("API_URL", "https://code.tinasoft.io/api/v1/chat/completions")
-        self.MODEL: str = os.getenv("MODEL", "google/gemini-2.5-flash-lite")
+        self.API_URL: str = os.getenv("API_URL", "https://openrouter.ai/api/v1/chat/completions")
+        self.MODEL: str = os.getenv("MODEL", "z-ai/glm-4.6")
 
         # OCR API Configuration
         self.OCR_UPLOAD_URL: str = os.getenv("OCR_UPLOAD_URL", "http://172.16.5.10:8001/api/v1/ocr/upload-image")
@@ -38,7 +38,7 @@ class Settings:
         }
 
         # Application Info
-        self.APP_NAME: str = "Hệ thống eKYC Căn cước công dân Lào"
+        self.APP_NAME: str = "ລະບົບ eKYC ບັດປະຈໍາຕົວ ສປປ ລາວ"
         self.APP_VERSION: str = "1.0.0"
 
     def validate(self) -> bool:
