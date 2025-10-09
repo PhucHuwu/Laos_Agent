@@ -55,6 +55,7 @@ let verificationInterval = null; // Interval cho xác thực realtime
 let websocket = null; // WebSocket connection
 let frameCount = 0; // Đếm frame để gửi
 const SEND_INTERVAL = 30; // Gửi mỗi 30 frame
+let hasShownFinalResult = false; // Flag để chỉ hiển thị kết quả cuối cùng 1 lần
 
 // Global variables for streaming
 let currentThinkingElement = null;
@@ -949,6 +950,7 @@ function startRealtimeVerification() {
 
   console.log("Starting realtime verification...");
   isRealtimeVerifying = true;
+  hasShownFinalResult = false; // Reset flag mỗi lần bắt đầu verification mới
 
   // Hiển thị UI realtime
   startVerifyBtn.style.display = "none";
@@ -1056,14 +1058,19 @@ function sendFrameToWebSocket(frameBase64) {
           updateVerificationStatus("ຢັ້ງຢືນສຳເລັດ!", "success", similarity);
           verificationMessage.textContent = result.msg || "ໃບໜ້າຖືກຢັ້ງຢືນສຳເລັດແລ້ວ!";
 
-          // Tự động dừng sau 3 giây
-          setTimeout(() => {
-            stopRealtimeVerification();
-            closeCameraModal();
-            addMessage("ຢັ້ງຢືນໃບໜ້າສຳເລັດ!", "bot");
-            addMessage(formatVerifyResult(result), "bot");
-            idCardUrl = null;
-          }, 3000);
+          // CHỈ hiển thị kết quả 1 lần duy nhất
+          if (!hasShownFinalResult) {
+            hasShownFinalResult = true; // Đánh dấu đã hiển thị
+            
+            // Tự động dừng sau 2 giây
+            setTimeout(() => {
+              stopRealtimeVerification();
+              closeCameraModal();
+              addMessage("ຢັ້ງຢືນໃບໜ້າສຳເລັດ!", "bot");
+              addMessage(formatVerifyResult(result), "bot");
+              idCardUrl = null;
+            }, 2000);
+          }
         } else {
           // ❌ ĐANG XÁC THỰC hoặc THẤT BẠI
           if (similarity < 0.5) {
@@ -1162,14 +1169,19 @@ function performRealtimeVerification() {
                     );
                     verificationMessage.textContent = result.msg || "ໃບໜ້າຖືກຢັ້ງຢືນສຳເລັດແລ້ວ!";
 
-                    // Tự động dừng sau 3 giây
-                    setTimeout(() => {
-                      stopRealtimeVerification();
-                      closeCameraModal();
-                      addMessage("ຢັ້ງຢືນໃບໜ້າສຳເລັດ!", "bot");
-                      addMessage(formatVerifyResult(result), "bot");
-                      idCardUrl = null;
-                    }, 3000);
+                    // CHỈ hiển thị kết quả 1 lần duy nhất (Capture button flow)
+                    if (!hasShownFinalResult) {
+                      hasShownFinalResult = true;
+                      
+                      // Tự động dừng sau 2 giây
+                      setTimeout(() => {
+                        stopRealtimeVerification();
+                        closeCameraModal();
+                        addMessage("ຢັ້ງຢືນໃບໜ້າສຳເລັດ!", "bot");
+                        addMessage(formatVerifyResult(result), "bot");
+                        idCardUrl = null;
+                      }, 2000);
+                    }
                   } else {
                     // ❌ XÁC THỰC THẤT BẠI
                     updateVerificationStatus(

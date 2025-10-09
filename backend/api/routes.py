@@ -244,27 +244,34 @@ def create_app() -> Flask:
             success = websocket_client.send_frame(frame_base64)
 
             if success:
-                # Đợi một chút để WebSocket xử lý (tùy chọn)
-                # Lưu ý: last_result có thể là kết quả của frame trước đó
+                # Đợi một chút để WebSocket xử lý
                 import time
                 time.sleep(0.05)  # Đợi 50ms để WebSocket xử lý
                 
                 # Get last result from WebSocket
                 result = websocket_client.get_last_result()
                 
-                # Debug: In ra response từ WebSocket để kiểm tra
-                if result:
+                # CHỈ return result khi có bbox (chứng tỏ WebSocket đã xử lý frame này)
+                # Nếu không có bbox, đó là kết quả cũ hoặc chưa có kết quả
+                if result and 'bbox' in result:
+                    # Debug: In ra response từ WebSocket
                     print("=" * 80)
-                    print("📥 RESPONSE TỪ WEBSOCKET:")
+                    print("📥 RESPONSE TỪ WEBSOCKET (Valid):")
                     print(json.dumps(result, indent=2, ensure_ascii=False))
                     print("=" * 80)
-
-                # Return response (có thể là None nếu chưa có kết quả)
-                return jsonify({
-                    'success': True,
-                    'message': 'ສົ່ງ frame ສຳເລັດແລ້ວ',
-                    'result': result  # Có thể None nếu WebSocket chưa trả về
-                })
+                    
+                    return jsonify({
+                        'success': True,
+                        'message': 'ສົ່ງ frame ສຳເລັດແລ້ວ',
+                        'result': result
+                    })
+                else:
+                    # Không có kết quả mới, chỉ return success
+                    return jsonify({
+                        'success': True,
+                        'message': 'ສົ່ງ frame ສຳເລັດແລ້ວ',
+                        'result': None  # Không có kết quả mới
+                    })
             else:
                 return jsonify({'error': 'ບໍ່ສາມາດສົ່ງ frame ໄດ້'}), 500
 

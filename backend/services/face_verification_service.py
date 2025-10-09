@@ -104,6 +104,7 @@ class RealtimeFaceVerificationClient:
         self.result_callback: Optional[Callable] = None
         self.id_card_base64: Optional[str] = None
         self.last_result: Optional[Dict[str, Any]] = None
+        self.ignore_next_response = False  # Flag để bỏ qua response của ID card
 
     def set_id_card_image(self, id_card_image_url: str) -> bool:
         """Set ID card image for verification"""
@@ -121,7 +122,20 @@ class RealtimeFaceVerificationClient:
         """Handle WebSocket messages"""
         try:
             data = json.loads(message)
-            self.last_result = data
+            
+            # Bỏ qua response đầu tiên sau khi gửi ID card (so sánh ID card với chính nó)
+            if self.ignore_next_response:
+                print(f"⏭️  Ignoring ID card self-comparison response: same_person={data.get('same_person')}, similarity={data.get('similarity')}")
+                self.ignore_next_response = False
+                return
+            
+            # CHỈ lưu result khi có bbox (là kết quả xác thực frame thực sự)
+            if 'bbox' in data:
+                self.last_result = data
+                print(f"✅ Received verification result: same_person={data.get('same_person')}, similarity={data.get('similarity'):.4f}")
+            else:
+                print(f"ℹ️  Received non-verification response (no bbox): {data.get('msg', 'No message')}")
+            
             if self.result_callback:
                 self.result_callback(data)
         except Exception as e:
@@ -150,8 +164,12 @@ class RealtimeFaceVerificationClient:
         # Send ID card image first
         if self.id_card_base64:
             try:
+                # Reset last_result và set flag để bỏ qua response của ID card
+                self.last_result = None
+                self.ignore_next_response = True  # Bỏ qua response so sánh ID card với chính nó
+                
                 ws.send(self.id_card_base64)
-                print("ID card image sent")
+                print("ID card image sent (will ignore self-comparison response)")
             except Exception as e:
                 print(f"Error sending ID card image: {e}")
 
@@ -200,12 +218,20 @@ class RealtimeFaceVerificationClient:
     def get_last_result(self) -> Optional[Dict[str, Any]]:
         """Get last verification result"""
         return self.last_result
+    
+    def get_and_clear_result(self) -> Optional[Dict[str, Any]]:
+        """Get last verification result and clear it"""
+        result = self.last_result
+        self.last_result = None  # Clear để tránh trả về kết quả cũ
+        return result
 
     def disconnect(self):
         """Disconnect WebSocket"""
         if self.ws:
             self.ws.close()
             self.is_connected = False
+            self.last_result = None
+            self.ignore_next_response = False  # Reset flag
 
 
 class FaceVerificationService:
