@@ -1514,6 +1514,17 @@ function cancelModalUpload() {
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   console.log("ລະບົບ eKYC ພ້ອມແລ້ວ!");
+  
+  // Đảm bảo camera modal bị đóng khi load trang
+  if (cameraModal) {
+    cameraModal.style.display = "none";
+  }
+  
+  // Stop camera nếu đang chạy
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
 });
 
 // Error Handling
@@ -1590,10 +1601,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Initialize
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Hệ thống eKYC đã sẵn sàng!");
-});
+// NOTE: Đã có DOMContentLoaded listener ở trên, không cần duplicate
 
 // Test function để kiểm tra camera modal
 function testCameraModal() {
