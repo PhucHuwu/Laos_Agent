@@ -650,11 +650,11 @@ function formatVerifyResult(verifyResult) {
     html += `<p class="match-fail">ບໍ່ແມ່ນຄົນດຽວກັນ</p>`;
   }
 
-  // Hiển thị message từ WebSocket nếu có
-  if (verifyResult.msg) {
-    html += `<h4><i class="fas fa-info-circle"></i> ຂໍ້ຄວາມ:</h4>`;
-    html += `<p>${verifyResult.msg}</p>`;
-  }
+  // Hiển thị message từ WebSocket nếu có (đã bị ẩn theo yêu cầu)
+  // if (verifyResult.msg) {
+  //   html += `<h4><i class="fas fa-info-circle"></i> ຂໍ້ຄວາມ:</h4>`;
+  //   html += `<p>${verifyResult.msg}</p>`;
+  // }
 
   // Hiển thị độ tương đồng
   if (verifyResult.similarity !== undefined) {
