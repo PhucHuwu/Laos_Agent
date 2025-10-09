@@ -207,8 +207,9 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
     html += '<h3><i class="fas fa-user-check"></i> ຜົນການຢັ້ງຢືນໃບໜ້າ</h3>'
     html += '</div>'
 
-    # Xác định trạng thái chính
-    is_success = verify_result.get('status') == "success"
+    # Lấy thông tin từ response
+    # NOTE: status = "success" là trạng thái API, KHÔNG phải kết quả xác thực
+    # Kết quả xác thực nằm ở same_person = True/False
     same_person = verify_result.get('same_person')
     similarity = verify_result.get('similarity')
 
@@ -218,7 +219,8 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
     if similarity is None:
         similarity = verify_result.get('match_score')
 
-    if is_success and same_person is not None:
+    # Kiểm tra có kết quả xác thực không (dựa vào same_person, không phải status)
+    if same_person is not None:
         # Thành công và có kết quả
         if same_person:
             # Xác thực thành công

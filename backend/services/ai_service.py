@@ -24,6 +24,50 @@ class AIService:
         # Define available tools
         self.tools = self._define_tools()
 
+    def _auto_cleanup_if_needed(self, user_input: str) -> None:
+        """
+        Tự động dọn dẹp dữ liệu nếu người dùng yêu cầu eKYC mới
+
+        Args:
+            user_input: Tin nhắn người dùng
+        """
+        user_input_lower = user_input.lower()
+        ekyc_keywords = ['ekyc', 'ຢັ້ງຢືນຕົວຕົນ', 'ຢັ້ງຢືນໃບໜ້າ', 'ສະແກນບັດ', 'ອັບໂຫຼດບັດ', 'ລົງທະບຽນ', 'ຢາກເຮັດ', 'ຢາກສະແກນ', 'ບັດປະຈໍາຕົວ']
+        restart_keywords = ['ໃໝ່', 'ຄືນໃໝ່', 'ອີກຄັ້ງ', 'ເລີ່ມໃໝ່', 'ລາງ', 'ເລີ່ມຕົ້ນ', 'ຄືນຄວາມ', 'ລົບ', 'ລາງ', 'ເລີ່ມຄືນ']
+
+        has_old_data = self.conversation.has_id_card_data()
+        is_ekyc_request = any(keyword in user_input_lower for keyword in ekyc_keywords)
+        is_restart_request = any(keyword in user_input_lower for keyword in restart_keywords)
+        verification_completed = self.conversation.get_context('verification_success', False)
+
+        should_clear = has_old_data and (
+            (is_ekyc_request and is_restart_request) or
+            (is_restart_request and ('ເລີ່ມຕົ້ນ' in user_input_lower or 'ເລີ່ມຄືນ' in user_input_lower)) or
+            (verification_completed and is_ekyc_request)
+        )
+
+        if should_clear:
+            if verification_completed:
+                print("🔄 Phát hiện eKYC đã hoàn tất + yêu cầu eKYC mới - Tự động dọn dẹp dữ liệu")
+            else:
+                print("🔄 Phát hiện yêu cầu eKYC mới - Tự động dọn dẹp dữ liệu")
+
+            # Import cleanup service để tự động dọn dẹp
+            try:
+                from .cleanup_service import CleanupService
+                cleanup_service = CleanupService()
+                cleanup_result = cleanup_service.cleanup_after_ekyc_completion(self.conversation)
+                if cleanup_result.get("success"):
+                    print("✅ Tự động dọn dẹp hoàn tất")
+                else:
+                    print(f"⚠️ Lỗi dọn dẹp: {cleanup_result.get('error')}")
+                    # Fallback to manual clear if cleanup service fails
+                    self.conversation.clear_ekyc_context()
+            except Exception as e:
+                print(f"⚠️ Lỗi import cleanup service: {str(e)}")
+                # Fallback to manual clear
+                self.conversation.clear_ekyc_context()
+
     def _initialize_system_message(self):
         """Initialize system message"""
         system_message = Message(
@@ -61,6 +105,11 @@ INTELLIGENT WORKFLOW:
 - open_camera_realtime: Open real-time camera for face verification. CRITICAL: ONLY use when user EXPLICITLY says they want face verification/authentication AND ID card data is already available in context
 - scan_image_from_url: Extract information from uploaded ID card image
 - verify_face: Verify face (compare ID card photo with selfie)
+
+**NOTE ON DATA CLEANUP:**
+- The system AUTOMATICALLY cleans up old eKYC data when user requests to do eKYC again
+- You don't need to manually cleanup - the system handles it automatically
+- Just guide users through the eKYC process naturally
 
 **CRITICAL RULES:**
 - ALWAYS respond in Lao language in ALL cases, regardless of what language the input uses - YOU MUST ALWAYS reply in Lao
@@ -174,33 +223,8 @@ Act as a professional, confident, and experienced consultant."""
         Returns:
             Dictionary containing AI response or tool calls
         """
-        # Kiểm tra nếu người dùng yêu cầu làm eKYC mới - clear context cũ
-        user_input_lower = user_input.lower()
-        ekyc_keywords = ['ekyc', 'ຢັ້ງຢືນຕົວຕົນ', 'ຢັ້ງຢືນໃບໜ້າ', 'ສະແກນບັດ', 'ອັບໂຫຼດບັດ', 'ລົງທະບຽນ', 'ຢາກເຮັດ', 'ຢາກສະແກນ', 'ບັດປະຈໍາຕົວ']
-        restart_keywords = ['ໃໝ່', 'ຄືນໃໝ່', 'ອີກຄັ້ງ', 'ເລີ່ມໃໝ່', 'ລາງ', 'ເລີ່ມຕົ້ນ', 'ຄືນຄວາມ', 'ລົບ', 'ລາງ', 'ເລີ່ມຄືນ']
-
-        # Nếu có dữ liệu eKYC cũ và người dùng yêu cầu làm eKYC (đặc biệt với từ khóa "mới"/"lại")
-        has_old_data = self.conversation.has_id_card_data()
-        is_ekyc_request = any(keyword in user_input_lower for keyword in ekyc_keywords)
-        is_restart_request = any(keyword in user_input_lower for keyword in restart_keywords)
-        verification_completed = self.conversation.get_context('verification_success', False)
-
-        # Clear context nếu:
-        # 1. Có cả eKYC keyword VÀ restart keyword, HOẶC
-        # 2. Chỉ có restart keyword nhưng rõ ràng về eKYC (ví dụ: "ເລີ່ມຕົ້ນໃໝ່" khi đã có data), HOẶC
-        # 3. ĐÃ xác thực thành công (verification_completed) VÀ người dùng yêu cầu eKYC lại
-        should_clear = has_old_data and (
-            (is_ekyc_request and is_restart_request) or
-            (is_restart_request and ('ເລີ່ມຕົ້ນ' in user_input_lower or 'ເລີ່ມຄືນ' in user_input_lower)) or
-            (verification_completed and is_ekyc_request)
-        )
-
-        if should_clear:
-            if verification_completed:
-                print("🔄 Phát hiện eKYC đã hoàn tất + yêu cầu eKYC mới - Xóa dữ liệu cũ")
-            else:
-                print("🔄 Phát hiện yêu cầu eKYC mới - Xóa dữ liệu cũ")
-            self.conversation.clear_ekyc_context()
+        # Tự động dọn dẹp nếu cần
+        self._auto_cleanup_if_needed(user_input)
 
         # Add user message to conversation
         user_message = Message(role="user", content=user_input)
@@ -337,33 +361,8 @@ Act as a professional, confident, and experienced consultant."""
         Yields:
             Dictionary containing streaming data chunks
         """
-        # Kiểm tra nếu người dùng yêu cầu làm eKYC mới - clear context cũ
-        user_input_lower = user_input.lower()
-        ekyc_keywords = ['ekyc', 'ຢັ້ງຢືນຕົວຕົນ', 'ຢັ້ງຢືນໃບໜ້າ', 'ສະແກນບັດ', 'ອັບໂຫຼດບັດ', 'ລົງທະບຽນ', 'ຢາກເຮັດ', 'ຢາກສະແກນ', 'ບັດປະຈໍາຕົວ']
-        restart_keywords = ['ໃໝ່', 'ຄືນໃໝ່', 'ອີກຄັ້ງ', 'ເລີ່ມໃໝ່', 'ລາງ', 'ເລີ່ມຕົ້ນ', 'ຄືນຄວາມ', 'ລົບ', 'ລາງ', 'ເລີ່ມຄືນ']
-
-        # Nếu có dữ liệu eKYC cũ và người dùng yêu cầu làm eKYC (đặc biệt với từ khóa "mới"/"lại")
-        has_old_data = self.conversation.has_id_card_data()
-        is_ekyc_request = any(keyword in user_input_lower for keyword in ekyc_keywords)
-        is_restart_request = any(keyword in user_input_lower for keyword in restart_keywords)
-        verification_completed = self.conversation.get_context('verification_success', False)
-
-        # Clear context nếu:
-        # 1. Có cả eKYC keyword VÀ restart keyword, HOẶC
-        # 2. Chỉ có restart keyword nhưng rõ ràng về eKYC (ví dụ: "ເລີ່ມຕົ້ນໃໝ່" khi đã có data), HOẶC
-        # 3. ĐÃ xác thực thành công (verification_completed) VÀ người dùng yêu cầu eKYC lại
-        should_clear = has_old_data and (
-            (is_ekyc_request and is_restart_request) or
-            (is_restart_request and ('ເລີ່ມຕົ້ນ' in user_input_lower or 'ເລີ່ມຄືນ' in user_input_lower)) or
-            (verification_completed and is_ekyc_request)
-        )
-
-        if should_clear:
-            if verification_completed:
-                print("🔄 Phát hiện eKYC đã hoàn tất + yêu cầu eKYC mới - Xóa dữ liệu cũ")
-            else:
-                print("🔄 Phát hiện yêu cầu eKYC mới - Xóa dữ liệu cũ")
-            self.conversation.clear_ekyc_context()
+        # Tự động dọn dẹp nếu cần
+        self._auto_cleanup_if_needed(user_input)
 
         # Add user message to conversation
         user_message = Message(role="user", content=user_input)

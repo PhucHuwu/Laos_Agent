@@ -637,37 +637,36 @@ function formatVerifyResult(verifyResult) {
 
   let html = '<div class="verify-result">';
 
-  // Xử lý format mới từ WebSocket API
-  if (verifyResult.status === "success") {
-    html += `<h4><i class="fas fa-check-circle"></i> ສະຖານະ:</h4>`;
-    html += `<p class="match-success">ຢັ້ງຢືນສຳເລັດ</p>`;
-
-    if (verifyResult.same_person !== undefined) {
-      const matchStatus = verifyResult.same_person
-        ? "ເປັນຄົນດຽວກັນ"
-        : "ບໍ່ແມ່ນຄົນດຽວກັນ";
-      const matchClass = verifyResult.same_person
-        ? "match-success"
-        : "match-fail";
-      html += `<h4><i class="fas fa-user-check"></i> ຜົນການຢັ້ງຢືນ:</h4>`;
-      html += `<p class="${matchClass}">${matchStatus}</p>`;
-    }
-
-    if (verifyResult.similarity !== undefined) {
-      html += `<h4><i class="fas fa-percentage"></i> ຄວາມຄ້າຍຄືກັນ:</h4>`;
-      html += `<p class="match-score">${(verifyResult.similarity * 100).toFixed(
-        2
-      )}%</p>`;
-    }
+  // Xác định kết quả xác thực dựa trên same_person, không phải status
+  const isVerified = verifyResult.same_person === true;
+  
+  // Hiển thị tiêu đề và kết quả chính
+  if (isVerified) {
+    html += `<h4><i class="fas fa-check-circle"></i> ຜົນການຢັ້ງຢືນ:</h4>`;
+    html += `<p class="match-success">ເປັນຄົນດຽວກັນ</p>`;
   } else {
-    html += `<h4><i class="fas fa-times-circle"></i> ສະຖານະ:</h4>`;
-    html += `<p class="match-fail">ຢັ້ງຢືນບໍ່ສຳເລັດ</p>`;
+    html += `<h4><i class="fas fa-times-circle"></i> ຜົນການຢັ້ງຢືນ:</h4>`;
+    html += `<p class="match-fail">ບໍ່ແມ່ນຄົນດຽວກັນ</p>`;
+  }
 
-    // Hiển thị error message nếu có và không phải success
-    if (verifyResult.error) {
-      html += `<h4><i class="fas fa-exclamation-triangle"></i> ຂໍ້ຜິດພາດ:</h4>`;
-      html += `<p>${verifyResult.error}</p>`;
-    }
+  // Hiển thị message từ WebSocket nếu có
+  if (verifyResult.msg) {
+    html += `<h4><i class="fas fa-info-circle"></i> ຂໍ້ຄວາມ:</h4>`;
+    html += `<p>${verifyResult.msg}</p>`;
+  }
+
+  // Hiển thị độ tương đồng
+  if (verifyResult.similarity !== undefined) {
+    const similarityPercent = (verifyResult.similarity * 100).toFixed(2);
+    const similarityClass = verifyResult.similarity >= 0.5 ? "match-score" : "match-fail";
+    html += `<h4><i class="fas fa-percentage"></i> ຄວາມຄ້າຍຄືກັນ:</h4>`;
+    html += `<p class="${similarityClass}">${similarityPercent}%</p>`;
+  }
+
+  // Hiển thị error nếu có
+  if (verifyResult.error) {
+    html += `<h4><i class="fas fa-exclamation-triangle"></i> ຂໍ້ຜິດພາດ:</h4>`;
+    html += `<p>${verifyResult.error}</p>`;
   }
 
   // Xử lý format cũ (backward compatibility)
@@ -827,6 +826,90 @@ function openCameraRealtimeModal(message, idCardUrlParam) {
   startCamera();
 }
 
+// Handle cleanup data action
+function handleCleanupData(message) {
+  console.log("Handling cleanup data:", message);
+
+  // Call cleanup API
+  fetch("/cleanup", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Cleanup result:", data);
+
+      if (data.success) {
+        // Clear local state
+        clearLocalState();
+
+        // Show success message
+        showNotification(message || "ໄດ້ລຶບຂໍ້ມູນສຳເລັດ", "success");
+      } else {
+        showNotification("ຂໍ້ຜິດພາດໃນການລຶບຂໍ້ມູນ", "error");
+      }
+    })
+    .catch((error) => {
+      console.error("Cleanup error:", error);
+      showNotification("ຂໍ້ຜິດພາດໃນການລຶບຂໍ້ມູນ", "error");
+    });
+}
+
+// Clear local state variables
+function clearLocalState() {
+  idCardUrl = null;
+  capturedImageData = null;
+  isRealtimeVerifying = false;
+  frameCount = 0;
+
+  // Close any open modals
+  closeUploadModal();
+  closeCameraModal();
+
+  console.log("✅ Local state cleared");
+}
+
+// Show notification
+function showNotification(message, type = "info") {
+  // Create notification element if not exists
+  let notification = document.getElementById("notification");
+  if (!notification) {
+    notification = document.createElement("div");
+    notification.id = "notification";
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      z-index: 9999;
+      display: none;
+    `;
+    document.body.appendChild(notification);
+  }
+
+  // Set style based on type
+  const colors = {
+    success: "#4CAF50",
+    error: "#f44336",
+    info: "#2196F3",
+    warning: "#ff9800",
+  };
+
+  notification.style.backgroundColor = colors[type] || colors.info;
+  notification.textContent = message;
+  notification.style.display = "block";
+
+  // Auto hide after 3 seconds
+  setTimeout(() => {
+    notification.style.display = "none";
+  }, 3000);
+}
+
 function startCamera() {
   console.log("Starting camera...");
   navigator.mediaDevices
@@ -950,15 +1033,28 @@ function sendFrameToWebSocket(frameBase64) {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success && data.result) {
+      // CHỈ xử lý khi có result VÀ có bbox (chứng tỏ WebSocket đã xử lý)
+      if (data.success && data.result && data.result.bbox) {
         const result = data.result;
         const similarity = result.similarity || 0;
         const isMatch = result.same_person === true;
 
-        // Cập nhật UI
-        if (isMatch && similarity > 0.8) {
+        // Debug: In ra response từ WebSocket
+        console.log("=" + "=".repeat(79));
+        console.log("📥 RESPONSE TỪ WEBSOCKET (Frontend):");
+        console.log("Result:", result);
+        console.log("same_person:", result.same_person);
+        console.log("similarity:", similarity);
+        console.log("msg:", result.msg);
+        console.log("bbox:", result.bbox);
+        console.log("=" + "=".repeat(79));
+
+        // Cập nhật UI - CHỈ dựa vào same_person từ WebSocket
+        // WebSocket đã xử lý logic xác thực, không cần check ngưỡng ở frontend
+        if (isMatch) {
+          // ✅ XÁC THỰC THÀNH CÔNG
           updateVerificationStatus("ຢັ້ງຢືນສຳເລັດ!", "success", similarity);
-          verificationMessage.textContent = "ໃບໜ້າຖືກຢັ້ງຢືນສຳເລັດແລ້ວ!";
+          verificationMessage.textContent = result.msg || "ໃບໜ້າຖືກຢັ້ງຢືນສຳເລັດແລ້ວ!";
 
           // Tự động dừng sau 3 giây
           setTimeout(() => {
@@ -969,10 +1065,16 @@ function sendFrameToWebSocket(frameBase64) {
             idCardUrl = null;
           }, 3000);
         } else {
-          updateVerificationStatus("ກຳລັງຢັ້ງຢືນ...", "verifying", similarity);
-          verificationMessage.textContent = `ຄວາມຄ້າຍຄືກັນ: ${(
-            similarity * 100
-          ).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
+          // ❌ ĐANG XÁC THỰC hoặc THẤT BẠI
+          if (similarity < 0.5) {
+            // Similarity quá thấp - hiển thị thông báo cảnh báo
+            updateVerificationStatus("ກຳລັງຢັ້ງຢືນ...", "failed", similarity);
+            verificationMessage.textContent = result.msg || `ຄວາມຄ້າຍຄືກັນ: ${(similarity * 100).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
+          } else {
+            // Đang xác thực
+            updateVerificationStatus("ກຳລັງຢັ້ງຢືນ...", "verifying", similarity);
+            verificationMessage.textContent = result.msg || `ຄວາມຄ້າຍຄືກັນ: ${(similarity * 100).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
+          }
         }
       }
     })
@@ -1048,15 +1150,17 @@ function performRealtimeVerification() {
                   const similarity = result.similarity || 0;
                   const isMatch = result.same_person === true;
 
-                  // Cập nhật UI
-                  if (isMatch && similarity > 0.8) {
+                  console.log("📸 Selfie capture verification:", result);
+
+                  // Cập nhật UI - CHỈ dựa vào same_person từ WebSocket
+                  if (isMatch) {
+                    // ✅ XÁC THỰC THÀNH CÔNG
                     updateVerificationStatus(
                       "ຢັ້ງຢືນສຳເລັດ!",
                       "success",
                       similarity
                     );
-                    verificationMessage.textContent =
-                      "ໃບໜ້າຖືກຢັ້ງຢືນສຳເລັດແລ້ວ!";
+                    verificationMessage.textContent = result.msg || "ໃບໜ້າຖືກຢັ້ງຢືນສຳເລັດແລ້ວ!";
 
                     // Tự động dừng sau 3 giây
                     setTimeout(() => {
@@ -1067,14 +1171,13 @@ function performRealtimeVerification() {
                       idCardUrl = null;
                     }, 3000);
                   } else {
+                    // ❌ XÁC THỰC THẤT BẠI
                     updateVerificationStatus(
-                      "ກຳລັງຢັ້ງຢືນ...",
-                      "verifying",
+                      "ຢັ້ງຢືນບໍ່ສຳເລັດ",
+                      "failed",
                       similarity
                     );
-                    verificationMessage.textContent = `ຄວາມຄ້າຍຄືກັນ: ${(
-                      similarity * 100
-                    ).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
+                    verificationMessage.textContent = result.msg || `ໃບໜ້າບໍ່ຕົງກັນ: ${(similarity * 100).toFixed(1)}%`;
                   }
                 } else {
                   updateVerificationStatus("ຂໍ້ຜິດພາດການຢັ້ງຢືນ", "failed", 0);
@@ -1189,8 +1292,9 @@ function verifyFaceFromCamera() {
             if (verifyData.success) {
               const result = verifyData.result;
 
-              // Kiểm tra kết quả xác thực
-              if (result.status === "success" && result.same_person === true) {
+              // Kiểm tra kết quả xác thực - CHỈ dựa vào same_person
+              // status = "success" là trạng thái API, KHÔNG phải kết quả xác thực
+              if (result.same_person === true) {
                 addMessage("ຢັ້ງຢືນໃບໜ້າສຳເລັດ!", "bot");
                 addMessage(formatVerifyResult(result), "bot");
               } else {

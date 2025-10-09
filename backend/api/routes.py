@@ -244,13 +244,26 @@ def create_app() -> Flask:
             success = websocket_client.send_frame(frame_base64)
 
             if success:
-                # Get last result
+                # Đợi một chút để WebSocket xử lý (tùy chọn)
+                # Lưu ý: last_result có thể là kết quả của frame trước đó
+                import time
+                time.sleep(0.05)  # Đợi 50ms để WebSocket xử lý
+                
+                # Get last result from WebSocket
                 result = websocket_client.get_last_result()
+                
+                # Debug: In ra response từ WebSocket để kiểm tra
+                if result:
+                    print("=" * 80)
+                    print("📥 RESPONSE TỪ WEBSOCKET:")
+                    print(json.dumps(result, indent=2, ensure_ascii=False))
+                    print("=" * 80)
 
+                # Return response (có thể là None nếu chưa có kết quả)
                 return jsonify({
                     'success': True,
                     'message': 'ສົ່ງ frame ສຳເລັດແລ້ວ',
-                    'result': result
+                    'result': result  # Có thể None nếu WebSocket chưa trả về
                 })
             else:
                 return jsonify({'error': 'ບໍ່ສາມາດສົ່ງ frame ໄດ້'}), 500
@@ -301,8 +314,9 @@ def create_app() -> Flask:
             if result.get('success'):
                 result_data = result.get('result', {})
 
-                # Kiểm tra kết quả verification
-                if result_data.get('status') == 'success' and result_data.get('same_person'):
+                # Kiểm tra kết quả verification - CHỈ dựa vào same_person
+                # status = "success" nghĩa là API hoàn tất, KHÔNG phải kết quả xác thực
+                if result_data.get('same_person') == True:
                     bot.conversation.set_progress('completed')
                     bot.conversation.set_context('verification_success', True)
                     print(f"✅ Verification successful, progress: {bot.conversation.get_progress()}")
@@ -354,8 +368,9 @@ def create_app() -> Flask:
             if result.get('success'):
                 result_data = result.get('result', {})
 
-                # Kiểm tra kết quả verification
-                if result_data.get('status') == 'success' and result_data.get('same_person'):
+                # Kiểm tra kết quả verification - CHỈ dựa vào same_person
+                # status = "success" nghĩa là API hoàn tất, KHÔNG phải kết quả xác thực
+                if result_data.get('same_person') == True:
                     bot.conversation.set_progress('completed')
                     bot.conversation.set_context('verification_success', True)
                     print(f"✅ Verification successful, progress: {bot.conversation.get_progress()}")
@@ -399,5 +414,43 @@ def create_app() -> Flask:
             return jsonify({'success': True, 'message': 'ໄດ້ reset ການສົນທະນາແລ້ວ'})
         except Exception as e:
             return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການ reset: {str(e)}'}), 500
+
+    @app.route('/cleanup', methods=['POST'])
+    def manual_cleanup():
+        """Manual cleanup dữ liệu eKYC"""
+        try:
+            result = bot.clear_ekyc_data()
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການ cleanup: {str(e)}'}), 500
+
+    @app.route('/reset-all', methods=['POST'])
+    def reset_all():
+        """Reset toàn bộ dữ liệu và files"""
+        try:
+            result = bot.reset_all_data()
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການ reset all: {str(e)}'}), 500
+
+    @app.route('/storage-info', methods=['GET'])
+    def get_storage_info():
+        """Lấy thông tin lưu trữ"""
+        try:
+            result = bot.get_storage_info()
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': f'ຂໍ້ຜິດພາດ storage info: {str(e)}'}), 500
+
+    @app.route('/schedule-cleanup', methods=['POST'])
+    def schedule_cleanup():
+        """Lên lịch dọn dẹp tự động"""
+        try:
+            data = request.get_json()
+            delay_seconds = data.get('delay_seconds', 30)
+            result = bot.schedule_auto_cleanup(delay_seconds)
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': f'ຂໍ້ຜິດພາດ schedule cleanup: {str(e)}'}), 500
 
     return app
