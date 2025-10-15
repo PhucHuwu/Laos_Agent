@@ -3,9 +3,7 @@ const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
 const sendButton = document.getElementById("send-button");
 const chatForm = document.getElementById("chat-form");
-const uploadBtn = document.getElementById("upload-btn");
 const quickActions = document.getElementById("quick-actions");
-const typingIndicator = document.getElementById("typing-indicator");
 
 // Modal elements
 const uploadModal = document.getElementById("uploadModal");
@@ -77,12 +75,10 @@ let currentThinkingElement = null;
 let currentMessageElement = null;
 let isStreaming = false;
 let useStreamingMode = true; // Set to true to enable streaming mode
+let isProcessing = false; // Track if bot is processing a message
 
 // Chat Form Events
 chatForm.addEventListener("submit", handleSubmit);
-uploadBtn.addEventListener("click", () =>
-  openUploadModal("ກະລຸນາອັບໂຫຼດຮູບບັດປະຈໍາຕົວຂອງທ່ານ")
-);
 
 // Quick Actions Events
 quickActions.addEventListener("click", (e) => {
@@ -107,15 +103,24 @@ quickActions.addEventListener("click", (e) => {
 // Chat Functions
 function handleSubmit(e) {
   e.preventDefault();
+  
+  // Prevent submission if already processing
+  if (isProcessing) {
+    return;
+  }
+  
   const message = userInput.value.trim();
   if (!message) return;
+
+  // Disable input controls
+  disableInputControls();
 
   // Add user message to chat
   addMessage(message, "user");
   userInput.value = "";
 
-  // Show typing indicator
-  showTypingIndicator();
+  // Show loading dots in bot message
+  showLoadingMessage();
 
   // Choose between streaming or regular mode
   if (useStreamingMode) {
@@ -123,6 +128,27 @@ function handleSubmit(e) {
   } else {
     handleRegularChat(message);
   }
+}
+
+// Disable input controls when bot is processing
+function disableInputControls() {
+  isProcessing = true;
+  userInput.disabled = true;
+  sendButton.disabled = true;
+  userInput.style.opacity = "0.6";
+  sendButton.style.opacity = "0.6";
+  sendButton.style.cursor = "not-allowed";
+}
+
+// Enable input controls when bot is done
+function enableInputControls() {
+  isProcessing = false;
+  userInput.disabled = false;
+  sendButton.disabled = false;
+  userInput.style.opacity = "1";
+  sendButton.style.opacity = "1";
+  sendButton.style.cursor = "pointer";
+  userInput.focus();
 }
 
 function handleRegularChat(message) {
@@ -138,31 +164,50 @@ function handleRegularChat(message) {
     .then((response) => response.json())
     .then((data) => {
       hideTypingIndicator();
+      enableInputControls();
 
       if (data.success) {
         // Check if response contains tool calls
         if (data.tool_calls) {
           handleToolCalls(data.tool_calls);
         } else {
-          addMessage(formatChatbotResponse(data.response), "bot");
+          // Update the loading message with actual response
+          if (currentMessageElement) {
+            currentMessageElement.innerHTML = formatChatbotResponse(data.response);
+          } else {
+            addMessage(formatChatbotResponse(data.response), "bot");
+          }
         }
       } else {
-        addMessage(
-          "ຂໍ້ຜິດພາດ: " + (data.error || "ມີຂໍ້ຜິດພາດເກີດຂຶ້ນ"),
-          "bot"
-        );
+        // Update the loading message with error
+        if (currentMessageElement) {
+          currentMessageElement.innerHTML = "ຂໍ້ຜິດພາດ: " + (data.error || "ມີຂໍ້ຜິດພາດເກີດຂຶ້ນ");
+        } else {
+          addMessage(
+            "ຂໍ້ຜິດພາດ: " + (data.error || "ມີຂໍ້ຜິດພາດເກີດຂຶ້ນ"),
+            "bot"
+          );
+        }
       }
+      currentMessageElement = null; // Reset for next message
     })
     .catch((error) => {
       hideTypingIndicator();
-      addMessage("ຂໍ້ຜິດພາດການເຊື່ອມຕໍ່: " + error.message, "bot");
+      enableInputControls();
+      // Update the loading message with error
+      if (currentMessageElement) {
+        currentMessageElement.innerHTML = "ຂໍ້ຜິດພາດການເຊື່ອມຕໍ່: " + error.message;
+        currentMessageElement = null;
+      } else {
+        addMessage("ຂໍ້ຜິດພາດການເຊື່ອມຕໍ່: " + error.message, "bot");
+      }
     });
 }
 
 function handleStreamingChat(message) {
   // Reset streaming state
   currentThinkingElement = null;
-  currentMessageElement = null;
+  // Note: currentMessageElement is already set by showLoadingMessage()
   isStreaming = true;
 
   let fullContent = "";
@@ -192,6 +237,7 @@ function handleStreamingChat(message) {
           if (done) {
             // Stream finished
             hideTypingIndicator();
+            enableInputControls();
             isStreaming = false;
 
             // Remove streaming cursor if exists
@@ -205,6 +251,10 @@ function handleStreamingChat(message) {
             if (hasToolCalls && toolCalls) {
               handleToolCalls(toolCalls);
             }
+
+            // Reset for next message
+            currentMessageElement = null;
+            currentThinkingElement = null;
 
             return;
           }
@@ -257,9 +307,17 @@ function handleStreamingChat(message) {
     })
     .catch((error) => {
       hideTypingIndicator();
+      enableInputControls();
       isStreaming = false;
       console.error("Streaming error:", error);
-      addMessage("ຂໍ້ຜິດພາດການເຊື່ອມຕໍ່: " + error.message, "bot");
+      
+      // Update the loading message with error
+      if (currentMessageElement) {
+        currentMessageElement.innerHTML = "ຂໍ້ຜິດພາດການເຊື່ອມຕໍ່: " + error.message;
+        currentMessageElement = null;
+      } else {
+        addMessage("ຂໍ້ຜິດພາດການເຊື່ອມຕໍ່: " + error.message, "bot");
+      }
     });
 }
 
@@ -280,10 +338,18 @@ function handleStreamChunk(data) {
     case "done":
       // Stream done
       hideTypingIndicator();
+      enableInputControls();
       break;
     case "error":
       hideTypingIndicator();
-      addMessage("ຂໍ້ຜິດພາດ: " + data.error, "bot");
+      enableInputControls();
+      // Update the loading message with error
+      if (currentMessageElement) {
+        currentMessageElement.innerHTML = "ຂໍ້ຜິດພາດ: " + data.error;
+        currentMessageElement = null;
+      } else {
+        addMessage("ຂໍ້ຜິດພາດ: " + data.error, "bot");
+      }
       break;
   }
 }
@@ -326,15 +392,18 @@ function markThinkingDone(data) {
 function handleContentChunk(data) {
   if (!currentMessageElement) {
     // Create message element
+    const messageWrapper = document.createElement("div");
+    messageWrapper.className = "message";
+
     const messageDiv = document.createElement("div");
     messageDiv.className = "bot-message";
-
-    const messageContent = document.createElement("div");
-    messageContent.className = "message-content";
 
     const messageAvatar = document.createElement("div");
     messageAvatar.className = "message-avatar";
     messageAvatar.innerHTML = '<i class="fas fa-robot"></i>';
+
+    const messageContent = document.createElement("div");
+    messageContent.className = "message-content";
 
     const messageBubble = document.createElement("div");
     messageBubble.className = "message-bubble bot-bubble";
@@ -347,27 +416,24 @@ function handleContentChunk(data) {
       minute: "2-digit",
     });
 
-    messageContent.appendChild(messageAvatar);
+    messageDiv.appendChild(messageAvatar);
     messageContent.appendChild(messageBubble);
     messageContent.appendChild(messageTime);
     messageDiv.appendChild(messageContent);
+    messageWrapper.appendChild(messageDiv);
 
-    chatBox.appendChild(messageDiv);
+    chatBox.appendChild(messageWrapper);
     currentMessageElement = messageBubble;
   }
 
   // Update content
-  const cursor = currentMessageElement.querySelector(".streaming-cursor");
   const formattedContent = formatChatbotResponse(
     data.full_content || data.content
   );
 
-  if (cursor) {
-    currentMessageElement.innerHTML =
-      formattedContent + '<span class="streaming-cursor"></span>';
-  } else {
-    currentMessageElement.innerHTML = formattedContent;
-  }
+  // Always show streaming cursor during streaming
+  currentMessageElement.innerHTML =
+    formattedContent + '<span class="streaming-cursor"></span>';
 
   chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -432,7 +498,10 @@ function retryVerification() {
 
 function addMessage(content, sender) {
   const messageDiv = document.createElement("div");
-  messageDiv.className = `${sender}-message`;
+  messageDiv.className = "message";
+
+  const senderDiv = document.createElement("div");
+  senderDiv.className = `${sender}-message`;
 
   const messageContent = document.createElement("div");
   messageContent.className = "message-content";
@@ -452,24 +521,64 @@ function addMessage(content, sender) {
     const messageAvatar = document.createElement("div");
     messageAvatar.className = "message-avatar";
     messageAvatar.innerHTML = '<i class="fas fa-robot"></i>';
-    messageContent.appendChild(messageAvatar);
+    senderDiv.appendChild(messageAvatar);
   }
 
   messageContent.appendChild(messageBubble);
   messageContent.appendChild(messageTime);
-  messageDiv.appendChild(messageContent);
+  senderDiv.appendChild(messageContent);
+  messageDiv.appendChild(senderDiv);
 
   chatBox.appendChild(messageDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function showTypingIndicator() {
-  typingIndicator.style.display = "flex";
+function showLoadingMessage() {
+  // Create a bot message with loading dots
+  const messageWrapper = document.createElement("div");
+  messageWrapper.className = "message";
+
+  const messageDiv = document.createElement("div");
+  messageDiv.className = "bot-message";
+
+  const messageAvatar = document.createElement("div");
+  messageAvatar.className = "message-avatar";
+  messageAvatar.innerHTML = '<i class="fas fa-robot"></i>';
+
+  const messageContent = document.createElement("div");
+  messageContent.className = "message-content";
+
+  const messageBubble = document.createElement("div");
+  messageBubble.className = "message-bubble bot-bubble";
+  messageBubble.innerHTML = '<div class="bot-loading-dots"><span></span><span></span><span></span></div>';
+
+  const messageTime = document.createElement("div");
+  messageTime.className = "message-time";
+  messageTime.textContent = new Date().toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  messageDiv.appendChild(messageAvatar);
+  messageContent.appendChild(messageBubble);
+  messageContent.appendChild(messageTime);
+  messageDiv.appendChild(messageContent);
+  messageWrapper.appendChild(messageDiv);
+
+  chatBox.appendChild(messageWrapper);
+  
+  // Save reference to the message bubble for updating later
+  currentMessageElement = messageBubble;
+  
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function showTypingIndicator() {
+  // Typing indicator removed - no-op function
+}
+
 function hideTypingIndicator() {
-  typingIndicator.style.display = "none";
+  // Typing indicator removed - no-op function
 }
 
 function formatFileSize(bytes) {
@@ -517,125 +626,105 @@ function formatScanResult(scanResult) {
 function formatMarkdownToHtml(markdownText) {
   if (!markdownText) return "<p>ບໍ່ມີເນື້ອຫາ</p>";
 
-  let html = '<div class="chatbot-response">';
+  // Configure marked.js for optimal parsing
+  if (typeof marked !== 'undefined') {
+    marked.setOptions({
+      breaks: true,          // Convert \n to <br>
+      gfm: true,             // GitHub Flavored Markdown
+      headerIds: false,      // Don't generate header IDs
+      mangle: false,         // Don't escape email addresses
+      pedantic: false,       // Be flexible with markdown
+      sanitize: false,       // We'll use DOMPurify instead
+      smartLists: true,      // Smarter list behavior
+      smartypants: false,    // Don't convert quotes to fancy typography
+      xhtml: false           // Use HTML5 tags
+    });
 
-  // Split into lines for processing
-  const lines = markdownText.split("\n");
-  let inList = false;
-  let inCodeBlock = false;
+    // Custom renderer for adding CSS classes
+    const renderer = new marked.Renderer();
+    
+    // Customize heading rendering
+    renderer.heading = function(text, level) {
+      return `<h${level} class="response-header">${text}</h${level}>`;
+    };
+    
+    // Customize paragraph rendering
+    renderer.paragraph = function(text) {
+      return `<p class="response-paragraph">${text}</p>`;
+    };
+    
+    // Customize list rendering
+    renderer.list = function(body, ordered, start) {
+      const type = ordered ? 'ol' : 'ul';
+      const startAttr = (ordered && start !== 1) ? ` start="${start}"` : '';
+      return `<${type} class="response-list"${startAttr}>${body}</${type}>`;
+    };
+    
+    // Customize list item rendering
+    renderer.listitem = function(text) {
+      return `<li class="response-list-item">${text}</li>`;
+    };
+    
+    // Customize code rendering
+    renderer.code = function(code, language) {
+      return `<div class="code-block"><pre><code class="language-${language || 'text'}">${code}</code></pre></div>`;
+    };
+    
+    // Customize inline code rendering
+    renderer.codespan = function(code) {
+      return `<code class="response-code">${code}</code>`;
+    };
+    
+    // Customize link rendering (add target="_blank" and rel)
+    renderer.link = function(href, title, text) {
+      const titleAttr = title ? ` title="${title}"` : '';
+      return `<a href="${href}" class="response-link" target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`;
+    };
+    
+    // Customize strong (bold) rendering
+    renderer.strong = function(text) {
+      return `<strong class="response-bold">${text}</strong>`;
+    };
+    
+    // Customize emphasis (italic) rendering
+    renderer.em = function(text) {
+      return `<em class="response-italic">${text}</em>`;
+    };
+    
+    // Customize blockquote rendering
+    renderer.blockquote = function(quote) {
+      return `<blockquote class="response-blockquote">${quote}</blockquote>`;
+    };
+    
+    // Customize table rendering
+    renderer.table = function(header, body) {
+      return `<div class="table-responsive"><table class="response-table"><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+    };
 
-  for (let line of lines) {
-    line = line.trim();
-
-    // Skip empty lines
-    if (!line) {
-      if (inList) {
-        html += "</ul>";
-        inList = false;
-      }
-      html += "<br>";
-      continue;
+    // Parse markdown with custom renderer
+    let html = marked.parse(markdownText, { renderer: renderer });
+    
+    // Sanitize HTML to prevent XSS attacks
+    if (typeof DOMPurify !== 'undefined') {
+      html = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: [
+          'p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre', 
+          'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+          'blockquote', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+          'div', 'span', 'img'
+        ],
+        ALLOWED_ATTR: ['href', 'title', 'class', 'target', 'rel', 'src', 'alt', 'start'],
+        ALLOW_DATA_ATTR: false
+      });
     }
-
-    // Code blocks
-    if (line.startsWith("```")) {
-      if (!inCodeBlock) {
-        html += '<div class="code-block"><pre><code>';
-        inCodeBlock = true;
-      } else {
-        html += "</code></pre></div>";
-        inCodeBlock = false;
-      }
-      continue;
-    }
-
-    if (inCodeBlock) {
-      html += `${line}\n`;
-      continue;
-    }
-
-    // Headers
-    if (line.startsWith("#")) {
-      const level = line.length - line.replace(/^#+/, "").length;
-      const headerText = line.replace(/^#+\s*/, "").trim();
-      html += `<h${Math.min(
-        level,
-        6
-      )} class="response-header">${headerText}</h${Math.min(level, 6)}>`;
-      continue;
-    }
-
-    // Lists
-    if (line.startsWith("- ") || line.startsWith("* ")) {
-      if (!inList) {
-        html += '<ul class="response-list">';
-        inList = true;
-      }
-      const itemText = line.substring(2).trim();
-      const processedText = processInlineFormatting(itemText);
-      html += `<li class="response-list-item">${processedText}</li>`;
-      continue;
-    }
-
-    // Numbered lists
-    if (/^\d+\.\s/.test(line)) {
-      if (!inList) {
-        html += '<ol class="response-list">';
-        inList = true;
-      }
-      const itemText = line.replace(/^\d+\.\s/, "").trim();
-      const processedText = processInlineFormatting(itemText);
-      html += `<li class="response-list-item">${processedText}</li>`;
-      continue;
-    }
-
-    // End list if we hit a non-list item
-    if (inList) {
-      html += "</ul>";
-      inList = false;
-    }
-
-    // Regular paragraphs
-    if (line) {
-      const processedLine = processInlineFormatting(line);
-      html += `<p class="response-paragraph">${processedLine}</p>`;
-    }
+    
+    // Wrap in chatbot-response div
+    return `<div class="chatbot-response">${html}</div>`;
   }
-
-  // Close any open list
-  if (inList) {
-    html += "</ul>";
-  }
-
-  html += "</div>";
-  return html;
-}
-
-function processInlineFormatting(text) {
-  // Bold text **text** or __text__
-  text = text.replace(
-    /\*\*(.*?)\*\*/g,
-    '<strong class="response-bold">$1</strong>'
-  );
-  text = text.replace(
-    /__(.*?)__/g,
-    '<strong class="response-bold">$1</strong>'
-  );
-
-  // Italic text *text* or _text_
-  text = text.replace(/\*(.*?)\*/g, '<em class="response-italic">$1</em>');
-  text = text.replace(/_(.*?)_/g, '<em class="response-italic">$1</em>');
-
-  // Inline code `code`
-  text = text.replace(/`(.*?)`/g, '<code class="response-code">$1</code>');
-
-  // Links [text](url)
-  text = text.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" class="response-link" target="_blank">$1</a>'
-  );
-
-  return text;
+  
+  // Fallback if marked.js is not loaded
+  console.warn('marked.js not loaded, using plain text');
+  return `<div class="chatbot-response"><p class="response-paragraph">${markdownText.replace(/\n/g, '<br>')}</p></div>`;
 }
 
 function formatChatbotResponse(responseText) {
