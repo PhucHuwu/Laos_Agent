@@ -57,6 +57,21 @@ let frameCount = 0; // Đếm frame để gửi
 const SEND_INTERVAL = 30; // Gửi mỗi 30 frame
 let hasShownFinalResult = false; // Flag để chỉ hiển thị kết quả cuối cùng 1 lần
 
+// Session management - Generate new session ID on page load
+let sessionId = null;
+
+function generateSessionId() {
+  return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+function getSessionId() {
+  if (!sessionId) {
+    sessionId = generateSessionId();
+    console.log("🆔 Generated new session ID:", sessionId);
+  }
+  return sessionId;
+}
+
 // Global variables for streaming
 let currentThinkingElement = null;
 let currentMessageElement = null;
@@ -116,6 +131,7 @@ function handleRegularChat(message) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-Session-ID": getSessionId(),
     },
     body: JSON.stringify({ message: message }),
   })
@@ -159,6 +175,7 @@ function handleStreamingChat(message) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-Session-ID": getSessionId(),
     },
     body: JSON.stringify({ message: message }),
   })
@@ -658,7 +675,8 @@ function formatVerifyResult(verifyResult) {
 
   // Hiển thị độ tương đồng
   if (verifyResult.similarity !== undefined) {
-    const similarityPercent = (verifyResult.similarity * 100).toFixed(2);
+    // Convert similarity từ [-1, 1] sang phần trăm [0%, 100%]
+    const similarityPercent = ((verifyResult.similarity + 1) / 2 * 100).toFixed(2);
     const similarityClass = verifyResult.similarity >= 0.5 ? "match-score" : "match-fail";
     html += `<h4><i class="fas fa-percentage"></i> ຄວາມຄ້າຍຄືກັນ:</h4>`;
     html += `<p class="${similarityClass}">${similarityPercent}%</p>`;
@@ -768,15 +786,11 @@ cameraModal.addEventListener("click", (e) => {
 // Handle tool calls from agent
 function handleToolCalls(toolCalls) {
   toolCalls.forEach((toolCall) => {
-    if (toolCall.function.name === "open_image_upload") {
+    if (toolCall.function.name === "start_ekyc_process") {
+      // Unified eKYC flow - start from ID card upload
       const args = JSON.parse(toolCall.function.arguments);
-      openUploadModal(args.message);
-    } else if (toolCall.function.name === "open_selfie_upload") {
-      const args = JSON.parse(toolCall.function.arguments);
-      openSelfieUploadModal(args.message, args.id_card_url);
-    } else if (toolCall.function.name === "open_camera_realtime") {
-      const args = JSON.parse(toolCall.function.arguments);
-      openCameraRealtimeModal(args.message, args.id_card_url);
+      console.log("🚀 Starting unified eKYC process...");
+      openUploadModal(args.message || "ຍິນດີຕ້ອນຮັບສູ່ລະບົບ eKYC! ກະລຸນາອັບໂຫຼດຮູບບັດປະຈໍາຕົວເພື່ອເລີ່ມຕົ້ນ");
     }
   });
 }
@@ -836,6 +850,7 @@ function handleCleanupData(message) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-Session-ID": getSessionId(),
     },
   })
     .then((response) => response.json())
@@ -969,7 +984,10 @@ function connectWebSocket() {
   // Kết nối đến Flask server để thiết lập WebSocket
   fetch("/start-websocket-verification", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "X-Session-ID": getSessionId()
+    },
     body: JSON.stringify({
       id_card_image_url: idCardUrl,
     }),
@@ -1028,7 +1046,10 @@ function captureAndSendFrame() {
 function sendFrameToWebSocket(frameBase64) {
   fetch("/send-frame", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "X-Session-ID": getSessionId()
+    },
     body: JSON.stringify({
       frame_base64: frameBase64,
     }),
@@ -1076,11 +1097,11 @@ function sendFrameToWebSocket(frameBase64) {
           if (similarity < 0.5) {
             // Similarity quá thấp - hiển thị thông báo cảnh báo
             updateVerificationStatus("ກຳລັງຢັ້ງຢືນ...", "failed", similarity);
-            verificationMessage.textContent = result.msg || `ຄວາມຄ້າຍຄືກັນ: ${(similarity * 100).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
+            verificationMessage.textContent = result.msg || `ຄວາມຄ້າຍຄືກັນ: ${((similarity + 1) / 2 * 100).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
           } else {
             // Đang xác thực
             updateVerificationStatus("ກຳລັງຢັ້ງຢືນ...", "verifying", similarity);
-            verificationMessage.textContent = result.msg || `ຄວາມຄ້າຍຄືກັນ: ${(similarity * 100).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
+            verificationMessage.textContent = result.msg || `ຄວາມຄ້າຍຄືກັນ: ${((similarity + 1) / 2 * 100).toFixed(1)}% - ກະລຸນາປັບມຸມເບິ່ງ`;
           }
         }
       }
@@ -1103,7 +1124,10 @@ function stopRealtimeVerification() {
   // Ngắt kết nối WebSocket
   fetch("/stop-websocket-verification", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "X-Session-ID": getSessionId()
+    },
   }).catch((error) => {
     console.error("Error stopping WebSocket:", error);
   });
@@ -1144,7 +1168,10 @@ function performRealtimeVerification() {
             // Gọi API xác thực realtime
             fetch("/verify-face-realtime", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { 
+                "Content-Type": "application/json",
+                "X-Session-ID": getSessionId()
+              },
               body: JSON.stringify({
                 id_card_image_url: idCardUrl,
                 selfie_image_url: data.image_url,
@@ -1189,7 +1216,7 @@ function performRealtimeVerification() {
                       "failed",
                       similarity
                     );
-                    verificationMessage.textContent = result.msg || `ໃບໜ້າບໍ່ຕົງກັນ: ${(similarity * 100).toFixed(1)}%`;
+                    verificationMessage.textContent = result.msg || `ໃບໜ້າບໍ່ຕົງກັນ: ${((similarity + 1) / 2 * 100).toFixed(1)}%`;
                   }
                 } else {
                   updateVerificationStatus("ຂໍ້ຜິດພາດການຢັ້ງຢືນ", "failed", 0);
@@ -1217,7 +1244,8 @@ function updateVerificationStatus(status, type, similarity) {
   verificationStatus.textContent = status;
   verificationStatus.className = `status-text status-${type}`;
 
-  const similarityPercent = Math.round(similarity * 100);
+  // Convert similarity từ [-1, 1] sang phần trăm [0%, 100%]
+  const similarityPercent = Math.round((similarity + 1) / 2 * 100);
   similarityFill.style.width = `${similarityPercent}%`;
   similarityText.textContent = `${similarityPercent}%`;
 }
@@ -1293,7 +1321,10 @@ function verifyFaceFromCamera() {
 
         fetch("/verify-face", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "X-Session-ID": getSessionId()
+          },
           body: JSON.stringify({
             id_card_image_url: idCardUrl,
             selfie_image_url: data.image_url,
@@ -1446,6 +1477,7 @@ function processModalImage() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "X-Session-ID": getSessionId(),
             },
             body: JSON.stringify({
               id_card_image_url: idCardUrl,
@@ -1455,7 +1487,12 @@ function processModalImage() {
             .then((response) => response.json())
             .then((verifyData) => {
               if (verifyData.success) {
-                addMessage("ຢັ້ງຢືນໃບໜ້າສຳເລັດ!", "bot");
+                // Check if same_person to determine success
+                if (verifyData.result && verifyData.result.same_person === true) {
+                  addMessage("ຢັ້ງຢືນໃບໜ້າສຳເລັດ!", "bot");
+                } else {
+                  addMessage("ຢັ້ງຢືນໃບໜ້າບໍ່ສຳເລັດ!", "bot");
+                }
                 addMessage(formatVerifyResult(verifyData.result), "bot");
               } else {
                 addMessage("ຢັ້ງຢືນໃບໜ້າບໍ່ສຳເລັດ: " + verifyData.error, "bot");
@@ -1481,18 +1518,16 @@ function processModalImage() {
             addMessage(formatScanResult(data.scan_result), "bot");
           }
 
-          // Xử lý AI response từ upload (có thể chứa tool calls)
-          if (data.ai_response) {
-            if (data.ai_response.tool_calls) {
-              // AI đã gọi tool để thực hiện bước tiếp theo
-              handleToolCalls(data.ai_response.tool_calls);
-            } else if (data.ai_response.response) {
-              // AI trả lời text
-              addMessage(
-                formatChatbotResponse(data.ai_response.response),
-                "bot"
+          // Unified eKYC flow: Auto-open camera after successful scan
+          if (data.auto_open_camera && data.id_card_url) {
+            console.log("🎥 Auto-opening camera for face verification...");
+            // Small delay to let user see scan results
+            setTimeout(() => {
+              openCameraRealtimeModal(
+                "ກະລຸນາຢັ້ງຢືນໃບໜ້າດ້ວຍກ້ອງຖ່າຍຮູບ",
+                data.id_card_url
               );
-            }
+            }, 1500); // 1.5 second delay
           }
         }
       } else {
@@ -1511,9 +1546,77 @@ function cancelModalUpload() {
   closeUploadModal();
 }
 
+// Initialize new session on page load
+function initializeNewSession() {
+  // Generate new session ID
+  sessionId = generateSessionId();
+  console.log("🆔 New session created:", sessionId);
+  
+  // Note: No need to call /reset since new session ID will automatically create new bot instance
+  fetch("/reset", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Session-ID": sessionId,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        console.log("=" + "=".repeat(79));
+        console.log("✅ NEW SESSION INITIALIZED");
+        console.log("Context:", data.context);
+        console.log("Progress:", data.progress);
+        console.log("Messages count:", data.messages_count);
+        console.log("=" + "=".repeat(79));
+        
+        // Show visual notification
+        showNotification("ເລີ່ມເຊດຊັນໃໝ່ສຳເລັດ!", "success");
+      } else {
+        console.warn("⚠️ Failed to initialize new session");
+        showNotification("ບໍ່ສາມາດເລີ່ມເຊດຊັນໃໝ່ໄດ້", "warning");
+      }
+    })
+    .catch((error) => {
+      console.error("❌ Error initializing new session:", error);
+      showNotification("ຂໍ້ຜິດພາດໃນການເລີ່ມເຊດຊັນໃໝ່", "error");
+    });
+}
+
+// Check conversation state (for debugging)
+function checkConversationState() {
+  fetch("/conversation-state", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Session-ID": getSessionId(),
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("=" + "=".repeat(79));
+      console.log("📊 CURRENT CONVERSATION STATE");
+      console.log("Context:", data.context);
+      console.log("Progress:", data.progress);
+      console.log("Messages count:", data.messages_count);
+      console.log("Messages:", data.messages);
+      console.log("=" + "=".repeat(79));
+      return data;
+    })
+    .catch((error) => {
+      console.error("❌ Error checking conversation state:", error);
+    });
+}
+
+// Make checkConversationState available globally for manual testing
+window.checkConversationState = checkConversationState;
+
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   console.log("ລະບົບ eKYC ພ້ອມແລ້ວ!");
+  
+  // Initialize new chatbot session on page load
+  initializeNewSession();
   
   // Đảm bảo camera modal bị đóng khi load trang
   if (cameraModal) {

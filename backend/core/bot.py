@@ -7,7 +7,6 @@ from typing import Dict, Any, Optional
 from ..services.ai_service import AIService
 from ..services.ocr_service import OCRService
 from ..services.face_verification_service import FaceVerificationService
-from ..services.cleanup_service import CleanupService
 from ..models.conversation import Conversation
 from ..models.verification import ScanResult, VerificationResult
 
@@ -19,7 +18,6 @@ class LaosEKYCBot:
         self.ai_service = AIService()
         self.ocr_service = OCRService()
         self.face_verification_service = FaceVerificationService()
-        self.cleanup_service = CleanupService()
         self.conversation = self.ai_service.conversation
 
     def chat(self, user_input: str) -> Any:
@@ -150,21 +148,10 @@ class LaosEKYCBot:
                 self.conversation.set_progress('completed')
                 print(f"✅ Progress updated: {self.conversation.get_progress()}")
 
-                # Tự động dọn dẹp dữ liệu sau khi eKYC hoàn tất thành công
-                try:
-                    cleanup_result = self.cleanup_service.cleanup_after_ekyc_completion(self.conversation)
-                    if cleanup_result.get("success"):
-                        print("🧹 Tự động dọn dẹp dữ liệu hoàn tất")
-                    else:
-                        print(f"⚠️ Lỗi dọn dẹp tự động: {cleanup_result.get('error')}")
-                except Exception as e:
-                    print(f"⚠️ Lỗi trong quá trình dọn dẹp tự động: {str(e)}")
-
                 return {
                     "success": True,
                     "data": result_data,
-                    "message": "Face verification successful!",
-                    "cleanup_completed": True
+                    "message": "Face verification successful!"
                 }
             else:
                 # Verification failed, require retry - quay lại id_scanned
@@ -240,19 +227,3 @@ class LaosEKYCBot:
     def get_conversation_history(self) -> list:
         """Get conversation history"""
         return self.ai_service.get_conversation_history()
-
-    def clear_ekyc_data(self):
-        """Clear eKYC-related data from conversation context"""
-        return self.cleanup_service.cleanup_after_ekyc_completion(self.conversation)
-
-    def reset_all_data(self):
-        """Reset toàn bộ dữ liệu và files"""
-        return self.cleanup_service.reset_all_data(self.conversation)
-
-    def get_storage_info(self):
-        """Lấy thông tin lưu trữ hiện tại"""
-        return self.cleanup_service.get_storage_info()
-
-    def schedule_auto_cleanup(self, delay_seconds: int = 30):
-        """Lên lịch dọn dẹp tự động"""
-        return self.cleanup_service.schedule_cleanup(self.conversation, delay_seconds)

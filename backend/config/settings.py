@@ -17,7 +17,7 @@ class Settings:
         # API Configuration
         self.API_KEY: Optional[str] = os.getenv("API_KEY")
         self.API_URL: str = os.getenv("API_URL", "https://openrouter.ai/api/v1/chat/completions")
-        self.MODEL: str = os.getenv("MODEL", "z-ai/glm-4.5v")
+        self.MODEL: str = os.getenv("MODEL", "z-ai/glm-4.5")
 
         # OCR API Configuration
         self.OCR_UPLOAD_URL: str = os.getenv("OCR_UPLOAD_URL", "http://172.16.5.10:8001/api/v1/ocr/upload-image")

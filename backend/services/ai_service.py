@@ -24,190 +24,63 @@ class AIService:
         # Define available tools
         self.tools = self._define_tools()
 
-    def _auto_cleanup_if_needed(self, user_input: str) -> None:
-        """
-        Tự động dọn dẹp dữ liệu nếu người dùng yêu cầu eKYC mới
-
-        Args:
-            user_input: Tin nhắn người dùng
-        """
-        user_input_lower = user_input.lower()
-        ekyc_keywords = ['ekyc', 'ຢັ້ງຢືນຕົວຕົນ', 'ຢັ້ງຢືນໃບໜ້າ', 'ສະແກນບັດ', 'ອັບໂຫຼດບັດ', 'ລົງທະບຽນ', 'ຢາກເຮັດ', 'ຢາກສະແກນ', 'ບັດປະຈໍາຕົວ']
-        restart_keywords = ['ໃໝ່', 'ຄືນໃໝ່', 'ອີກຄັ້ງ', 'ເລີ່ມໃໝ່', 'ລາງ', 'ເລີ່ມຕົ້ນ', 'ຄືນຄວາມ', 'ລົບ', 'ລາງ', 'ເລີ່ມຄືນ']
-
-        has_old_data = self.conversation.has_id_card_data()
-        is_ekyc_request = any(keyword in user_input_lower for keyword in ekyc_keywords)
-        is_restart_request = any(keyword in user_input_lower for keyword in restart_keywords)
-        verification_completed = self.conversation.get_context('verification_success', False)
-
-        should_clear = has_old_data and (
-            (is_ekyc_request and is_restart_request) or
-            (is_restart_request and ('ເລີ່ມຕົ້ນ' in user_input_lower or 'ເລີ່ມຄືນ' in user_input_lower)) or
-            (verification_completed and is_ekyc_request)
-        )
-
-        if should_clear:
-            if verification_completed:
-                print("🔄 Phát hiện eKYC đã hoàn tất + yêu cầu eKYC mới - Tự động dọn dẹp dữ liệu")
-            else:
-                print("🔄 Phát hiện yêu cầu eKYC mới - Tự động dọn dẹp dữ liệu")
-
-            # Import cleanup service để tự động dọn dẹp
-            try:
-                from .cleanup_service import CleanupService
-                cleanup_service = CleanupService()
-                cleanup_result = cleanup_service.cleanup_after_ekyc_completion(self.conversation)
-                if cleanup_result.get("success"):
-                    print("✅ Tự động dọn dẹp hoàn tất")
-                else:
-                    print(f"⚠️ Lỗi dọn dẹp: {cleanup_result.get('error')}")
-                    # Fallback to manual clear if cleanup service fails
-                    self.conversation.clear_ekyc_context()
-            except Exception as e:
-                print(f"⚠️ Lỗi import cleanup service: {str(e)}")
-                # Fallback to manual clear
-                self.conversation.clear_ekyc_context()
-
     def _initialize_system_message(self):
         """Initialize system message"""
         system_message = Message(
             role="system",
             content="""You are an AI assistant specialized in supporting Lao citizens with eKYC (electronic Know Your Customer) for Lao national ID cards.
 
-YOU ARE AN INTELLIGENT ASSISTANT - AUTONOMOUSLY DECIDE ALL ACTIONS:
+YOU ARE AN INTELLIGENT ASSISTANT - SIMPLIFIED WORKFLOW:
 
 1. **Natural conversation**: Answer all citizen questions in a friendly and easy-to-understand manner in Lao language
-2. **Autonomous tool usage**: You have full autonomy to decide when to use tools, without waiting for specific user requests
+2. **Single tool approach**: You have ONE simple tool to handle complete eKYC verification
 
-INTELLIGENT WORKFLOW:
+INTELLIGENT WORKFLOW - SIMPLIFIED:
 
-**When user requests eKYC or mentions national ID card:**
-- Check if ID card data already exists in context
-- If exists and user wants to do NEW eKYC (mentions "ໃໝ່", "ຄືນໃໝ່", "ອີກຄັ້ງ"), the system will automatically clear old data
-- Automatically call "open_image_upload" tool to open ID card image upload popup
-- Guide user to upload their national ID card image
+**When user wants to do eKYC verification:**
+- Detect keywords: "ekyc", "ຢັ້ງຢືນ", "ບັດປະຈໍາຕົວ", "ຢັ້ງຢືນໃບໜ້າ", "ສະແກນບັດ", "ອັບໂຫຼດ", "ລົງທະບຽນ", "ຢາກເຮັດ", etc.
+- Simply call "start_ekyc_process" tool with a welcoming message in Lao
+- The tool will handle the entire flow automatically: upload → scan → face verification
+- You don't need to manage individual steps
 
-**When user uploads national ID card image:**
-- Automatically call "scan_image_from_url" tool to extract information from the image
-- Display extracted information for user confirmation
+**When user has already completed eKYC:**
+- If they want to do it AGAIN (mentions "ໃໝ່", "ຄືນໃໝ່", "ອີກຄັ້ງ"), the system auto-clears old data
+- Then call "start_ekyc_process" again for fresh verification
 
-**When user explicitly requests face verification OR after successful scan AND user confirms they want to continue:**
-- If no ID card data available: Automatically call "open_image_upload" tool to request ID card upload first
-- If ID card data already available: Automatically call "open_camera_realtime" tool to open camera for face verification
-
-**HANDLING REPEAT eKYC REQUESTS:**
-- If user already completed eKYC and requests to do it AGAIN with keywords like "ໃໝ່" (new), "ອີກຄັ້ງ" (again), "ຄືນໃໝ່" (restart), the system will clear old data
-- Then guide user to start fresh eKYC process from image upload
-- Always treat repeat requests as new sessions, not reusing old images
-
-**AVAILABLE TOOLS:**
-- open_image_upload: Open popup to upload national ID card image. Use when user wants to start eKYC or mentions ID card
-- open_camera_realtime: Open real-time camera for face verification. CRITICAL: ONLY use when user EXPLICITLY says they want face verification/authentication AND ID card data is already available in context
-- scan_image_from_url: Extract information from uploaded ID card image
-- verify_face: Verify face (compare ID card photo with selfie)
-
-**NOTE ON DATA CLEANUP:**
-- The system AUTOMATICALLY cleans up old eKYC data when user requests to do eKYC again
-- You don't need to manually cleanup - the system handles it automatically
-- Just guide users through the eKYC process naturally
+**AVAILABLE TOOL:**
+- start_ekyc_process: Start complete eKYC process from beginning to end. Use this ONLY tool when user requests eKYC verification.
 
 **CRITICAL RULES:**
-- ALWAYS respond in Lao language in ALL cases, regardless of what language the input uses - YOU MUST ALWAYS reply in Lao
-- MANDATORY: Even if user writes in English, Vietnamese, Thai, or any other language, you MUST respond in Lao language only
+- ALWAYS respond in Lao language in ALL cases, regardless of input language - YOU MUST ALWAYS reply in Lao
+- MANDATORY: Even if user writes in English, Vietnamese, Thai, or any language, you MUST respond in Lao only
 - LANGUAGE RULE IS ABSOLUTE: No exceptions - 100% of your responses must be in Lao language
-- You are the guide, citizens just need to follow your instructions
-- All decisions are made by you based on conversation context
-- DO NOT automatically open camera after scan - wait for user to explicitly request face verification
-- For normal questions and conversations, just answer without calling any tools
-- DISTINGUISH between questions ABOUT eKYC/verification (just answer) vs requests TO DO eKYC/verification (call tool)
-  * Questions like "How long?", "What is?", "How does it work?" = just answer, NO tool call
-  * Requests like "I want to do", "Help me verify", "Start verification" = call appropriate tool
-- ONLY call tools when user explicitly requests eKYC-related ACTIONS (not questions about them)
-- Clearly explain each step so citizens understand
-- Always check conditions before executing (e.g., check if ID card image exists before face verification)
-- IMPORTANT: Only call "open_camera_realtime" when user explicitly asks for face verification ACTION
-- When user wants to do eKYC again, ALWAYS start from scratch with new image upload
+- DISTINGUISH between questions ABOUT eKYC (just answer) vs requests TO DO eKYC (call tool):
+  * Questions like "ນານປານໃດ?" (How long?), "ແມ່ນຫຍັງ?" (What is?), "ເຮັດແນວໃດ?" (How?) = just answer, NO tool
+  * Requests like "ຢາກເຮັດ eKYC" (I want to do eKYC), "ຊ່ວຍຢັ້ງຢືນ" (Help verify) = call start_ekyc_process tool
+- For normal conversations and questions, just answer without calling tools
+- Be professional, confident, and experienced consultant
 
-Act as a professional, confident, and experienced consultant."""
+Act as a helpful guide for Lao citizens."""
         )
         self.conversation.add_message(system_message)
 
     def _define_tools(self) -> List[Dict[str, Any]]:
-        """Define available tools for the AI"""
+        """Define available tools for the AI - Only expose start_ekyc_process to simplify AI decision-making"""
         return [
             {
                 "type": "function",
                 "function": {
-                    "name": "open_image_upload",
-                    "description": "Open popup to upload national ID card image. Use when user needs to upload ID card for eKYC or face verification",
+                    "name": "start_ekyc_process",
+                    "description": "Start complete eKYC verification process. This single tool initiates the entire flow: ID card upload → scan → face verification. Use this when user wants to do eKYC, verify identity, or mentions ID card/verification in Lao language.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "message": {
                                 "type": "string",
-                                "description": "Instruction message for user about uploading national ID card image (must be in Lao language)"
+                                "description": "Welcome message to guide user through eKYC process (must be in Lao language)"
                             }
                         },
                         "required": ["message"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "scan_image_from_url",
-                    "description": "Automatically scan and extract information from uploaded national ID card image. Use immediately after user uploads ID card",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "image_url": {
-                                "type": "string",
-                                "description": "URL of the uploaded national ID card image"
-                            }
-                        },
-                        "required": ["image_url"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "open_camera_realtime",
-                    "description": "Open real-time camera for face verification. ONLY use this tool when: 1) User EXPLICITLY requests face verification/authentication, OR 2) User explicitly asks to verify their face/identity, OR 3) User explicitly wants to proceed with face verification after ID scan. DO NOT use for normal conversation or general questions. Requires ID card data to be available.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "message": {
-                                "type": "string",
-                                "description": "Instruction message for user about face verification using camera (must be in Lao language)"
-                            },
-                            "id_card_url": {
-                                "type": "string",
-                                "description": "URL of the scanned national ID card image (required for verification)"
-                            }
-                        },
-                        "required": ["message", "id_card_url"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "verify_face",
-                    "description": "Verify face by comparing ID card photo with selfie photo",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "id_card_image_url": {
-                                "type": "string",
-                                "description": "URL of the national ID card image"
-                            },
-                            "selfie_image_url": {
-                                "type": "string",
-                                "description": "URL of the selfie image for verification"
-                            }
-                        },
-                        "required": ["id_card_image_url", "selfie_image_url"]
                     }
                 }
             }
@@ -223,9 +96,6 @@ Act as a professional, confident, and experienced consultant."""
         Returns:
             Dictionary containing AI response or tool calls
         """
-        # Tự động dọn dẹp nếu cần
-        self._auto_cleanup_if_needed(user_input)
-
         # Add user message to conversation
         user_message = Message(role="user", content=user_input)
         self.conversation.add_message(user_message)
@@ -262,14 +132,11 @@ Act as a professional, confident, and experienced consultant."""
         if progress_summary['verification_completed']:
             context_parts.append("Face verification completed successfully")
 
-        # Add guidance based on current progress
+        # Add simplified guidance based on current progress
         if progress_summary['progress'] == 'idle':
-            context_parts.append("GUIDANCE: If user wants to start eKYC, call 'open_image_upload' tool")
-        elif progress_summary['progress'] == 'id_scanned' and not progress_summary['verification_completed']:
-            context_parts.append(
-                f"GUIDANCE: ID card data is ready. ONLY if user EXPLICITLY requests face verification, call 'open_camera_realtime' tool with id_card_url = '{progress_summary['id_card_url']}'")
+            context_parts.append("GUIDANCE: If user wants to start eKYC verification, call 'start_ekyc_process' tool")
         elif progress_summary['progress'] == 'completed':
-            context_parts.append("GUIDANCE: eKYC is complete. If user wants to do it again, system will clear old data and restart")
+            context_parts.append("GUIDANCE: eKYC completed. If user wants to do it again, call 'start_ekyc_process' tool (system will auto-clear old data)")
 
         context_parts.append("REMEMBER: Your response must be in Lao language.")
 
@@ -361,9 +228,6 @@ Act as a professional, confident, and experienced consultant."""
         Yields:
             Dictionary containing streaming data chunks
         """
-        # Tự động dọn dẹp nếu cần
-        self._auto_cleanup_if_needed(user_input)
-
         # Add user message to conversation
         user_message = Message(role="user", content=user_input)
         self.conversation.add_message(user_message)
@@ -400,14 +264,11 @@ Act as a professional, confident, and experienced consultant."""
         if progress_summary['verification_completed']:
             context_parts.append("Face verification completed successfully")
 
-        # Add guidance based on current progress
+        # Add simplified guidance based on current progress
         if progress_summary['progress'] == 'idle':
-            context_parts.append("GUIDANCE: If user wants to start eKYC, call 'open_image_upload' tool")
-        elif progress_summary['progress'] == 'id_scanned' and not progress_summary['verification_completed']:
-            context_parts.append(
-                f"GUIDANCE: ID card data is ready. ONLY if user EXPLICITLY requests face verification, call 'open_camera_realtime' tool with id_card_url = '{progress_summary['id_card_url']}'")
+            context_parts.append("GUIDANCE: If user wants to start eKYC verification, call 'start_ekyc_process' tool")
         elif progress_summary['progress'] == 'completed':
-            context_parts.append("GUIDANCE: eKYC is complete. If user wants to do it again, system will clear old data and restart")
+            context_parts.append("GUIDANCE: eKYC completed. If user wants to do it again, call 'start_ekyc_process' tool (system will auto-clear old data)")
 
         context_parts.append("REMEMBER: Your response must be in Lao language.")
 
@@ -577,49 +438,19 @@ Act as a professional, confident, and experienced consultant."""
             }
 
     def _handle_tool_call(self, tool_call: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Handle individual tool calls"""
+        """Handle tool calls - only start_ekyc_process is exposed to AI"""
         try:
             function_name = tool_call['function']['name']
             arguments = json.loads(tool_call['function']['arguments'])
 
-            if function_name == "open_image_upload":
-                message = arguments.get("message", "ກະລຸນາອັບໂຫຼດຮູບບັດປະຈໍາຕົວຂອງທ່ານ")
+            if function_name == "start_ekyc_process":
+                message = arguments.get("message", "ຍິນດີຕ້ອນຮັບສູ່ລະບົບ eKYC! ກະລຸນາອັບໂຫຼດຮູບບັດປະຈໍາຕົວຂອງທ່ານເພື່ອເລີ່ມຕົ້ນ")
                 return {
                     "success": True,
-                    "action": "open_upload_popup",
+                    "action": "start_ekyc_flow",
                     "message": message,
                     "tool_call_id": tool_call['id']
                 }
-
-            elif function_name == "open_selfie_upload":
-                message = arguments.get("message", "ກະລຸນາອັບໂຫຼດຮູບ selfie ເພື່ອຢັ້ງຢືນໃບໜ້າ")
-                id_card_url = arguments.get("id_card_url")
-                return {
-                    "success": True,
-                    "action": "open_selfie_upload_popup",
-                    "message": message,
-                    "id_card_url": id_card_url,
-                    "tool_call_id": tool_call['id']
-                }
-
-            elif function_name == "open_camera_realtime":
-                message = arguments.get("message", "ກະລຸນາຢັ້ງຢືນໃບໜ້າດ້ວຍກ້ອງຖ່າຍຮູບ")
-                id_card_url = arguments.get("id_card_url")
-
-                # Nếu AI không truyền id_card_url, lấy từ context
-                if not id_card_url and self.conversation.has_id_card_data():
-                    id_card_url = self.conversation.get_id_card_url()
-
-                return {
-                    "success": True,
-                    "action": "open_camera_realtime",
-                    "message": message,
-                    "id_card_url": id_card_url,
-                    "tool_call_id": tool_call['id']
-                }
-
-            # Note: Other tools (upload_image_to_server, scan_image_from_url, verify_face)
-            # are handled by the Flask app routes, not here
 
         except Exception as e:
             print(f"Error handling tool {tool_call['function']['name']}: {e}")
@@ -694,8 +525,20 @@ Act as a professional, confident, and experienced consultant."""
 
     def reset_conversation(self):
         """Reset the conversation to initial state"""
+        print("="*80)
+        print("🔄 RESETTING CONVERSATION")
+        print(f"Before reset - Messages count: {len(self.conversation.messages)}")
+        print(f"Before reset - Context: {self.conversation.context}")
+        print(f"Before reset - Progress: {self.conversation.progress}")
+        
         self.conversation.clear()
         self._initialize_system_message()
+        
+        print(f"After reset - Messages count: {len(self.conversation.messages)}")
+        print(f"After reset - Context: {self.conversation.context}")
+        print(f"After reset - Progress: {self.conversation.progress}")
+        print("✅ CONVERSATION RESET COMPLETE")
+        print("="*80)
 
     def get_conversation_history(self) -> List[Dict[str, Any]]:
         """Get conversation history"""

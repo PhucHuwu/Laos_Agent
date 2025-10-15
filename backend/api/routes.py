@@ -9,6 +9,8 @@ from flask import Flask, render_template, request, jsonify, session, send_file, 
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from typing import Dict, Any
+import uuid
+import time
 
 from ..config import settings
 from ..core import LaosEKYCBot
@@ -23,7 +25,7 @@ def create_app() -> Flask:
                 static_folder='../../frontend/assets',
                 static_url_path='/static')
     app.secret_key = settings.FLASK_SECRET_KEY
-    CORS(app)
+    CORS(app, supports_credentials=True)
 
     # Configure upload
     if not os.path.exists(settings.UPLOAD_FOLDER):
@@ -32,11 +34,49 @@ def create_app() -> Flask:
     app.config['UPLOAD_FOLDER'] = settings.UPLOAD_FOLDER
     app.config['MAX_CONTENT_LENGTH'] = settings.MAX_CONTENT_LENGTH
 
-    # Initialize bot
-    bot = LaosEKYCBot()
+    # Store bot instances per session (with cleanup for old sessions)
+    bot_sessions = {}
+    session_timestamps = {}
+    SESSION_TIMEOUT = 3600  # 1 hour timeout
 
-    # Global WebSocket client for real-time verification
-    websocket_client = None
+    def cleanup_old_sessions():
+        """Remove sessions older than timeout"""
+        current_time = time.time()
+        expired_sessions = [
+            sid for sid, timestamp in session_timestamps.items()
+            if current_time - timestamp > SESSION_TIMEOUT
+        ]
+        for sid in expired_sessions:
+            if sid in bot_sessions:
+                del bot_sessions[sid]
+                del session_timestamps[sid]
+                print(f"🗑️ Cleaned up expired session: {sid}")
+
+    def get_bot_for_session() -> LaosEKYCBot:
+        """Get or create bot instance for current session"""
+        # Get session ID from request header or create new one
+        session_id = request.headers.get('X-Session-ID')
+        
+        if not session_id:
+            print("⚠️ No session ID provided in request")
+            # Fallback: try to use Flask session
+            if 'session_id' not in session:
+                session['session_id'] = str(uuid.uuid4())
+                print(f"📝 Created new Flask session: {session['session_id']}")
+            session_id = session['session_id']
+        
+        # Cleanup old sessions periodically
+        cleanup_old_sessions()
+        
+        # Get or create bot for this session
+        if session_id not in bot_sessions:
+            bot_sessions[session_id] = LaosEKYCBot()
+            print(f"🤖 Created new bot instance for session: {session_id}")
+        
+        # Update timestamp
+        session_timestamps[session_id] = time.time()
+        
+        return bot_sessions[session_id]
 
     def allowed_file(filename: str) -> bool:
         """Check if file extension is allowed"""
@@ -68,6 +108,8 @@ def create_app() -> Flask:
     @app.route('/upload', methods=['POST'])
     def upload_file():
         """Handle file upload"""
+        bot = get_bot_for_session()
+        
         if 'file' not in request.files:
             return jsonify({'error': 'ບໍ່ໄດ້ເລືອກໄຟລ໌'}), 400
 
@@ -104,9 +146,7 @@ def create_app() -> Flask:
                     bot.conversation.set_progress('id_scanned')
                     print(f"✅ Progress updated in upload route: {bot.conversation.get_progress()}")
 
-                    # Sau khi scan thành công, AI tự động gọi camera verification
-                    ai_response = bot.chat("Tôi đã upload và scan ảnh căn cước công dân thành công. Bây giờ hãy tiến hành xác thực khuôn mặt.")
-
+                    # Unified eKYC flow: Auto-trigger camera modal after successful scan
                     return jsonify({
                         'success': True,
                         'image_url': result.get('image_url'),
@@ -114,7 +154,7 @@ def create_app() -> Flask:
                         'formatted_html': formatted_html,
                         'message': 'ອັບໂຫຼດ ແລະ ສະແກນສຳເລັດ! ກະລຸນາກວດສອບຂໍ້ມູນຂ້າງລຸ່ມນີ້.',
                         'id_card_url': result.get('image_url'),
-                        'ai_response': ai_response  # AI response với tool calls
+                        'auto_open_camera': True  # Signal frontend to auto-open camera for face verification
                     })
                 else:
                     return jsonify({'error': result.get('error', 'ບໍ່ສາມາດປຸງແຕ່ງຮູບໄດ້')}), 500
@@ -130,6 +170,7 @@ def create_app() -> Flask:
     @app.route('/chat', methods=['POST'])
     def chat():
         """Handle chat messages"""
+        bot = get_bot_for_session()
         data = request.get_json()
         user_message = data.get('message', '')
 
@@ -156,6 +197,7 @@ def create_app() -> Flask:
     @app.route('/chat-stream', methods=['POST'])
     def chat_stream():
         """Handle streaming chat messages with thinking/reasoning"""
+        bot = get_bot_for_session()
         data = request.get_json()
         user_message = data.get('message', '')
 
@@ -193,8 +235,7 @@ def create_app() -> Flask:
     @app.route('/start-websocket-verification', methods=['POST'])
     def start_websocket_verification():
         """Start WebSocket verification"""
-        nonlocal websocket_client
-
+        bot = get_bot_for_session()
         data = request.get_json()
         id_card_image_url = data.get('id_card_image_url')
 
@@ -225,8 +266,8 @@ def create_app() -> Flask:
     @app.route('/send-frame', methods=['POST'])
     def send_frame():
         """Send frame for real-time verification"""
-        nonlocal websocket_client
-
+        bot = get_bot_for_session()
+        websocket_client = bot.face_verification_service.realtime_client
         data = request.get_json()
         frame_base64 = data.get('frame_base64')
 
@@ -282,12 +323,12 @@ def create_app() -> Flask:
     @app.route('/stop-websocket-verification', methods=['POST'])
     def stop_websocket_verification():
         """Stop WebSocket verification"""
-        nonlocal websocket_client
-
+        bot = get_bot_for_session()
+        websocket_client = bot.face_verification_service.realtime_client
+        
         try:
             if websocket_client:
                 bot.stop_realtime_verification()
-                websocket_client = None
 
             return jsonify({
                 'success': True,
@@ -301,6 +342,7 @@ def create_app() -> Flask:
     @app.route('/verify-face-realtime', methods=['POST'])
     def verify_face_realtime():
         """Handle real-time face verification"""
+        bot = get_bot_for_session()
         data = request.get_json()
         id_card_image_url = data.get('id_card_image_url')
         selfie_image_url = data.get('selfie_image_url')
@@ -358,6 +400,7 @@ def create_app() -> Flask:
     @app.route('/verify-face', methods=['POST'])
     def verify_face():
         """Handle face verification"""
+        bot = get_bot_for_session()
         data = request.get_json()
         id_card_image_url = data.get('id_card_image_url')
         selfie_image_url = data.get('selfie_image_url')
@@ -415,49 +458,38 @@ def create_app() -> Flask:
 
     @app.route('/reset', methods=['POST'])
     def reset_conversation():
-        """Reset conversation"""
+        """Reset conversation or create new session"""
         try:
+            bot = get_bot_for_session()
             bot.reset_conversation()
-            return jsonify({'success': True, 'message': 'ໄດ້ reset ການສົນທະນາແລ້ວ'})
+            return jsonify({
+                'success': True, 
+                'message': 'ໄດ້ reset ການສົນທະນາແລ້ວ',
+                'context': bot.conversation.context,
+                'progress': bot.conversation.progress,
+                'messages_count': len(bot.conversation.messages)
+            })
         except Exception as e:
             return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການ reset: {str(e)}'}), 500
-
-    @app.route('/cleanup', methods=['POST'])
-    def manual_cleanup():
-        """Manual cleanup dữ liệu eKYC"""
+    
+    @app.route('/conversation-state', methods=['GET'])
+    def get_conversation_state():
+        """Get current conversation state for debugging"""
         try:
-            result = bot.clear_ekyc_data()
-            return jsonify(result)
+            bot = get_bot_for_session()
+            session_id = request.headers.get('X-Session-ID', 'no-session-id')
+            return jsonify({
+                'success': True,
+                'context': bot.conversation.context,
+                'progress': bot.conversation.progress,
+                'messages_count': len(bot.conversation.messages),
+                'messages': [{
+                    'role': msg.role,
+                    'content': msg.content[:100] if msg.content else None,
+                    'has_tool_calls': bool(msg.tool_calls)
+                } for msg in bot.conversation.messages]
+            })
         except Exception as e:
-            return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການ cleanup: {str(e)}'}), 500
-
-    @app.route('/reset-all', methods=['POST'])
-    def reset_all():
-        """Reset toàn bộ dữ liệu và files"""
-        try:
-            result = bot.reset_all_data()
-            return jsonify(result)
-        except Exception as e:
-            return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການ reset all: {str(e)}'}), 500
-
-    @app.route('/storage-info', methods=['GET'])
-    def get_storage_info():
-        """Lấy thông tin lưu trữ"""
-        try:
-            result = bot.get_storage_info()
-            return jsonify(result)
-        except Exception as e:
-            return jsonify({'error': f'ຂໍ້ຜິດພາດ storage info: {str(e)}'}), 500
-
-    @app.route('/schedule-cleanup', methods=['POST'])
-    def schedule_cleanup():
-        """Lên lịch dọn dẹp tự động"""
-        try:
-            data = request.get_json()
-            delay_seconds = data.get('delay_seconds', 30)
-            result = bot.schedule_auto_cleanup(delay_seconds)
-            return jsonify(result)
-        except Exception as e:
-            return jsonify({'error': f'ຂໍ້ຜິດພາດ schedule cleanup: {str(e)}'}), 500
+            return jsonify({'error': f'Error: {str(e)}'}), 500
 
     return app

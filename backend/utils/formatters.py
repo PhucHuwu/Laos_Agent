@@ -234,7 +234,8 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
 
             # Hiển thị độ tương đồng một cách thân thiện
             if similarity is not None:
-                similarity_percent = similarity * 100 if similarity <= 1 else similarity
+                # Convert similarity từ [-1, 1] sang phần trăm [0%, 100%]
+                similarity_percent = (similarity + 1) / 2 * 100
                 html += '<div class="similarity-display">'
                 html += f'<div class="similarity-score">{similarity_percent:.1f}%</div>'
                 html += '<div class="similarity-label">ຄວາມຄ້າຍຄືກັນ</div>'
@@ -260,7 +261,8 @@ def format_verify_result(verify_result: Dict[str, Any]) -> str:
             html += '<p>ໃບໜ້າໃນຮູບບັດປະຈໍາຕົວ ແລະ ຮູບ selfie ບໍ່ຕົງກັນ.</p>'
 
             if similarity is not None:
-                similarity_percent = similarity * 100 if similarity <= 1 else similarity
+                # Convert similarity từ [-1, 1] sang phần trăm [0%, 100%]
+                similarity_percent = (similarity + 1) / 2 * 100
                 html += '<div class="similarity-display">'
                 html += f'<div class="similarity-score low">{similarity_percent:.1f}%</div>'
                 html += '<div class="similarity-label">ຄວາມຄ້າຍຄືກັນ</div>'
