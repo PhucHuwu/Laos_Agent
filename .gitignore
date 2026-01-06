@@ -1,9 +1,0 @@
-.env
-.vscode
-.cursor
-.github
-__pycache__/
-tests/
-*tests.py
-uploads/
-.DS_Store
