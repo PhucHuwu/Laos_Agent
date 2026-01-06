@@ -56,7 +56,7 @@ def create_app() -> Flask:
         """Get or create bot instance for current session"""
         # Get session ID from request header or create new one
         session_id = request.headers.get('X-Session-ID')
-        
+
         if not session_id:
             print("⚠️ No session ID provided in request")
             # Fallback: try to use Flask session
@@ -64,18 +64,18 @@ def create_app() -> Flask:
                 session['session_id'] = str(uuid.uuid4())
                 print(f"📝 Created new Flask session: {session['session_id']}")
             session_id = session['session_id']
-        
+
         # Cleanup old sessions periodically
         cleanup_old_sessions()
-        
+
         # Get or create bot for this session
         if session_id not in bot_sessions:
             bot_sessions[session_id] = LaosEKYCBot()
             print(f"🤖 Created new bot instance for session: {session_id}")
-        
+
         # Update timestamp
         session_timestamps[session_id] = time.time()
-        
+
         return bot_sessions[session_id]
 
     def allowed_file(filename: str) -> bool:
@@ -108,14 +108,27 @@ def create_app() -> Flask:
     @app.route('/upload', methods=['POST'])
     def upload_file():
         """Handle file upload"""
-        bot = get_bot_for_session()
-        
+        print("=" * 80)
+        print("📤 UPLOAD REQUEST RECEIVED")
+
+        try:
+            bot = get_bot_for_session()
+            print(f"✅ Bot instance retrieved successfully")
+        except Exception as e:
+            print(f"❌ Error getting bot: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': f'Lỗi khởi tạo bot: {str(e)}'}), 500
+
         if 'file' not in request.files:
+            print("❌ No file in request.files")
             return jsonify({'error': 'ບໍ່ໄດ້ເລືອກໄຟລ໌'}), 400
 
         file = request.files['file']
+        print(f"📁 File received: {file.filename}")
 
         if file.filename == '':
+            print("❌ Empty filename")
             return jsonify({'error': 'ບໍ່ໄດ້ເລືອກໄຟລ໌'}), 400
 
         if file and allowed_file(file.filename):
@@ -123,26 +136,37 @@ def create_app() -> Flask:
             filename = secure_filename(file.filename)
             unique_filename = f"{uuid.uuid4()}_{filename}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            print(f"📂 Saving to: {filepath}")
 
             # Save file
-            file.save(filepath)
+            try:
+                file.save(filepath)
+                print(f"✅ File saved successfully")
+            except Exception as e:
+                print(f"❌ Error saving file: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                return jsonify({'error': f'Lỗi lưu file: {str(e)}'}), 500
 
             try:
                 # Process image
+                print(f"🔄 Calling bot.process_image_upload...")
                 result = bot.process_image_upload(filepath)
+                print(f"📦 OCR Result: {result}")
 
                 # Remove temporary file
                 os.remove(filepath)
+                print(f"🗑️ Temp file removed")
 
                 if result.get('success'):
                     scan_data = result.get('scan_result')
-                    formatted_html = format_scan_result(scan_data) if scan_data else "<p>Không có dữ liệu scan</p>"
+                    formatted_html = format_scan_result(scan_data) if scan_data else "<p>Khong co du lieu scan</p>"
 
-                    # Lưu ID card URL vào context trước khi gọi AI
+                    # Luu ID card URL vao context truoc khi goi AI
                     bot.conversation.set_context('id_card_url', result.get('image_url'))
                     bot.conversation.set_context('scan_result', scan_data)
 
-                    # Cập nhật progress: đã upload và scan thành công
+                    # Cap nhat progress: da upload va scan thanh cong
                     bot.conversation.set_progress('id_scanned')
                     print(f"✅ Progress updated in upload route: {bot.conversation.get_progress()}")
 
@@ -157,14 +181,19 @@ def create_app() -> Flask:
                         'auto_open_camera': True  # Signal frontend to auto-open camera for face verification
                     })
                 else:
+                    print(f"❌ OCR failed: {result.get('error')}")
                     return jsonify({'error': result.get('error', 'ບໍ່ສາມາດປຸງແຕ່ງຮູບໄດ້')}), 500
 
             except Exception as e:
                 # Remove temporary file on error
+                print(f"❌ Exception during processing: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 if os.path.exists(filepath):
                     os.remove(filepath)
                 return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການປຸງແຕ່ງຮູບ: {str(e)}'}), 500
 
+        print(f"❌ File extension not allowed: {file.filename}")
         return jsonify({'error': 'ຮູບແບບໄຟລ໌ບໍ່ຮອງຮັບ'}), 400
 
     @app.route('/chat', methods=['POST'])
@@ -288,10 +317,10 @@ def create_app() -> Flask:
                 # Đợi một chút để WebSocket xử lý
                 import time
                 time.sleep(0.05)  # Đợi 50ms để WebSocket xử lý
-                
+
                 # Get last result from WebSocket
                 result = websocket_client.get_last_result()
-                
+
                 # CHỈ return result khi có bbox (chứng tỏ WebSocket đã xử lý frame này)
                 # Nếu không có bbox, đó là kết quả cũ hoặc chưa có kết quả
                 if result and 'bbox' in result:
@@ -300,7 +329,7 @@ def create_app() -> Flask:
                     print("📥 RESPONSE TỪ WEBSOCKET (Valid):")
                     print(json.dumps(result, indent=2, ensure_ascii=False))
                     print("=" * 80)
-                    
+
                     return jsonify({
                         'success': True,
                         'message': 'ສົ່ງ frame ສຳເລັດແລ້ວ',
@@ -325,7 +354,7 @@ def create_app() -> Flask:
         """Stop WebSocket verification"""
         bot = get_bot_for_session()
         websocket_client = bot.face_verification_service.realtime_client
-        
+
         try:
             if websocket_client:
                 bot.stop_realtime_verification()
@@ -463,7 +492,7 @@ def create_app() -> Flask:
             bot = get_bot_for_session()
             bot.reset_conversation()
             return jsonify({
-                'success': True, 
+                'success': True,
                 'message': 'ໄດ້ reset ການສົນທະນາແລ້ວ',
                 'context': bot.conversation.context,
                 'progress': bot.conversation.progress,
@@ -471,7 +500,7 @@ def create_app() -> Flask:
             })
         except Exception as e:
             return jsonify({'error': f'ຂໍ້ຜິດພາດໃນການ reset: {str(e)}'}), 500
-    
+
     @app.route('/conversation-state', methods=['GET'])
     def get_conversation_state():
         """Get current conversation state for debugging"""

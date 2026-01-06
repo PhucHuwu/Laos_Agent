@@ -8,7 +8,7 @@
 [![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-*A comprehensive eKYC system for Laotian citizen identity verification combining AI-powered chatbot technology, OCR document scanning, and real-time facial recognition.*
+_A comprehensive eKYC system for Laotian citizen identity verification combining AI-powered chatbot technology, OCR document scanning, and real-time facial recognition._
 
 [Features](#-key-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [API Reference](#-api-reference) • [Contributing](#-contributing)
 
@@ -18,21 +18,21 @@
 
 ## 📋 Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [System Architecture](#-system-architecture)
-- [Technology Stack](#-technology-stack)
-- [Quick Start](#-quick-start)
-- [Configuration](#-configuration)
-- [API Reference](#-api-reference)
-- [Module Documentation](#-module-documentation)
-- [Development Guide](#-development-guide)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Security Considerations](#-security-considerations)
-- [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
-- [License](#-license)
+-   [Overview](#-overview)
+-   [Key Features](#-key-features)
+-   [System Architecture](#-system-architecture)
+-   [Technology Stack](#-technology-stack)
+-   [Quick Start](#-quick-start)
+-   [Configuration](#-configuration)
+-   [API Reference](#-api-reference)
+-   [Module Documentation](#-module-documentation)
+-   [Development Guide](#-development-guide)
+-   [Testing](#-testing)
+-   [Deployment](#-deployment)
+-   [Security Considerations](#-security-considerations)
+-   [Troubleshooting](#-troubleshooting)
+-   [Contributing](#-contributing)
+-   [License](#-license)
 
 ---
 
@@ -40,52 +40,57 @@
 
 The **Laos eKYC Identity Verification System** is a modern, AI-powered solution designed to streamline the identity verification process for Laotian citizens. The system leverages cutting-edge technologies including:
 
-- **AI Chatbot** (Google Gemini 2.5 Flash Lite) for conversational user guidance in Lao language
-- **OCR Technology** for automated document scanning and data extraction
-- **Real-time Facial Recognition** using WebSocket for live verification
-- **Automated Data Management** with cleanup and storage optimization
+-   **AI Chatbot** (Google Gemini 2.5 Flash Lite) for conversational user guidance in Lao language
+-   **OCR Technology** for automated document scanning and data extraction
+-   **Real-time Facial Recognition** using WebSocket for live verification
+-   **Automated Data Management** with cleanup and storage optimization
 
 ### Use Cases
 
-- 🏦 **Banking & Financial Services**: Customer onboarding and KYC compliance
-- 🏢 **Government Services**: Citizen identification and verification
-- 📱 **Telecommunications**: SIM card registration and account verification
-- 🏥 **Healthcare**: Patient registration and identity confirmation
-- 🎓 **Education**: Student enrollment and identity verification
+-   🏦 **Banking & Financial Services**: Customer onboarding and KYC compliance
+-   🏢 **Government Services**: Citizen identification and verification
+-   📱 **Telecommunications**: SIM card registration and account verification
+-   🏥 **Healthcare**: Patient registration and identity confirmation
+-   🎓 **Education**: Student enrollment and identity verification
 
 ---
 
 ## 🚀 Key Features
 
 ### 💬 AI-Powered Conversational Interface
-- **Lao Language Support**: Native Lao language interface for seamless user experience
-- **Streaming Responses**: Real-time thinking and reasoning display
-- **Context-Aware Conversations**: Maintains conversation history and context
-- **Tool Call Management**: Intelligent orchestration of verification steps
+
+-   **Lao Language Support**: Native Lao language interface for seamless user experience
+-   **Streaming Responses**: Real-time thinking and reasoning display
+-   **Context-Aware Conversations**: Maintains conversation history and context
+-   **Tool Call Management**: Intelligent orchestration of verification steps
 
 ### 📄 Document Processing
-- **OCR Scanning**: Automatic extraction of data from Laotian ID cards
-- **Image Upload**: Support for JPEG, PNG, JPG formats (up to 16MB)
-- **Data Validation**: Automatic validation of extracted information
-- **Formatted Display**: Clean, readable presentation of scan results
+
+-   **OCR Scanning**: Automatic extraction of data from Laotian ID cards
+-   **Image Upload**: Support for JPEG, PNG, JPG formats (up to 16MB)
+-   **Data Validation**: Automatic validation of extracted information
+-   **Formatted Display**: Clean, readable presentation of scan results
 
 ### 👤 Facial Verification
-- **Batch Verification**: Single-shot face comparison
-- **Real-time Verification**: Live camera feed processing via WebSocket
-- **Multi-mode Support**: Both static image and live video verification
-- **Confidence Scoring**: Detailed similarity scores and verification status
+
+-   **Batch Verification**: Single-shot face comparison
+-   **Real-time Verification**: Live camera feed processing via WebSocket
+-   **Multi-mode Support**: Both static image and live video verification
+-   **Confidence Scoring**: Detailed similarity scores and verification status
 
 ### 🧹 Data Management
-- **Auto Cleanup**: Scheduled automatic cleanup of temporary files
-- **Storage Monitoring**: Real-time storage usage tracking
-- **Manual Controls**: On-demand data cleanup and reset
-- **Progress Tracking**: Step-by-step verification progress monitoring
+
+-   **Auto Cleanup**: Scheduled automatic cleanup of temporary files
+-   **Storage Monitoring**: Real-time storage usage tracking
+-   **Manual Controls**: On-demand data cleanup and reset
+-   **Progress Tracking**: Step-by-step verification progress monitoring
 
 ### 🔒 Security Features
-- **Secure File Upload**: Validated file types and size limits
-- **Temporary Storage**: Automatic cleanup of sensitive data
-- **Session Management**: Secure conversation and context handling
-- **Error Handling**: Comprehensive error handling and logging
+
+-   **Secure File Upload**: Validated file types and size limits
+-   **Temporary Storage**: Automatic cleanup of sensitive data
+-   **Session Management**: Secure conversation and context handling
+-   **Error Handling**: Comprehensive error handling and logging
 
 ---
 
@@ -182,29 +187,33 @@ Laos_Agent/
 ## 🛠️ Technology Stack
 
 ### Backend
-- **Python**: 3.11.5
-- **Framework**: Flask 2.3.3
-- **CORS**: Flask-CORS 4.0.0
-- **HTTP Client**: Requests 2.31.0
-- **WebSocket**: websockets 11.0.3, websocket-client 1.6.4
-- **Environment**: python-dotenv 1.0.0
-- **File Monitoring**: watchdog 2.3.0+
+
+-   **Python**: 3.11.5
+-   **Framework**: Flask 2.3.3
+-   **CORS**: Flask-CORS 4.0.0
+-   **HTTP Client**: Requests 2.31.0
+-   **WebSocket**: websockets 11.0.3, websocket-client 1.6.4
+-   **Environment**: python-dotenv 1.0.0
+-   **File Monitoring**: watchdog 2.3.0+
 
 ### Frontend
-- **HTML5**: Modern semantic markup
-- **CSS3**: Responsive design with custom styling
-- **JavaScript**: Vanilla ES6+ (no framework dependencies)
-- **WebSocket**: Real-time communication
+
+-   **HTML5**: Modern semantic markup
+-   **CSS3**: Responsive design with custom styling
+-   **JavaScript**: Vanilla ES6+ (no framework dependencies)
+-   **WebSocket**: Real-time communication
 
 ### AI & External Services
-- **AI Model**: Google Gemini 2.5 Flash Lite
-- **OCR**: Custom OCR API integration
-- **Face Verification**: WebSocket-based real-time verification service
+
+-   **AI Model**: Google Gemini 2.5 Flash Lite
+-   **OCR**: Custom OCR API integration
+-   **Face Verification**: WebSocket-based real-time verification service
 
 ### Development Tools
-- **Testing**: pytest
-- **Version Control**: Git
-- **IDE Support**: VS Code, PyCharm
+
+-   **Testing**: pytest
+-   **Version Control**: Git
+-   **IDE Support**: VS Code, PyCharm
 
 ---
 
@@ -212,10 +221,10 @@ Laos_Agent/
 
 ### Prerequisites
 
-- Python 3.11.5 or higher
-- pip package manager
-- Webcam (for facial verification)
-- Internet connection (for AI and OCR services)
+-   Python 3.11.5 or higher
+-   pip package manager
+-   Webcam (for facial verification)
+-   Internet connection (for AI and OCR services)
 
 ### Installation
 
@@ -296,22 +305,22 @@ You should see the eKYC verification interface!
 
 ### Environment Variables Reference
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `APP_NAME` | Application name | Laos eKYC Agent | No |
-| `FLASK_HOST` | Server host address | 0.0.0.0 | No |
-| `FLASK_PORT` | Server port | 5001 | No |
-| `FLASK_DEBUG` | Debug mode | False | No |
-| `FLASK_SECRET_KEY` | Flask secret key | - | **Yes** |
-| `API_KEY` | Gemini API key | - | **Yes** |
-| `API_URL` | AI API endpoint | - | **Yes** |
-| `MODEL` | AI model name | google/gemini-2.5-flash-lite | No |
-| `OCR_UPLOAD_URL` | OCR upload endpoint | - | **Yes** |
-| `OCR_SCAN_URL` | OCR scan endpoint | - | **Yes** |
-| `OCR_WEBSOCKET_URL` | OCR WebSocket endpoint | - | **Yes** |
-| `UPLOAD_FOLDER` | Upload directory | uploads | No |
-| `MAX_CONTENT_LENGTH` | Max file size (bytes) | 16777216 (16MB) | No |
-| `ALLOWED_EXTENSIONS` | Allowed file types | png,jpg,jpeg | No |
+| Variable             | Description            | Default                      | Required |
+| -------------------- | ---------------------- | ---------------------------- | -------- |
+| `APP_NAME`           | Application name       | Laos eKYC Agent              | No       |
+| `FLASK_HOST`         | Server host address    | 0.0.0.0                      | No       |
+| `FLASK_PORT`         | Server port            | 5001                         | No       |
+| `FLASK_DEBUG`        | Debug mode             | False                        | No       |
+| `FLASK_SECRET_KEY`   | Flask secret key       | -                            | **Yes**  |
+| `API_KEY`            | Gemini API key         | -                            | **Yes**  |
+| `API_URL`            | AI API endpoint        | -                            | **Yes**  |
+| `MODEL`              | AI model name          | google/gemini-2.5-flash-lite | No       |
+| `OCR_UPLOAD_URL`     | OCR upload endpoint    | -                            | **Yes**  |
+| `OCR_SCAN_URL`       | OCR scan endpoint      | -                            | **Yes**  |
+| `OCR_WEBSOCKET_URL`  | OCR WebSocket endpoint | -                            | **Yes**  |
+| `UPLOAD_FOLDER`      | Upload directory       | uploads                      | No       |
+| `MAX_CONTENT_LENGTH` | Max file size (bytes)  | 16777216 (16MB)              | No       |
+| `ALLOWED_EXTENSIONS` | Allowed file types     | png,jpg,jpeg                 | No       |
 
 ### Configuration Validation
 
@@ -335,34 +344,40 @@ Please check your .env file and ensure all required settings are configured.
 ### Chat Endpoints
 
 #### POST /chat
+
 Send a chat message and receive AI response.
 
 **Request:**
+
 ```json
 {
-  "message": "ສະບາຍດີ"
+    "message": "ສະບາຍດີ"
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "response": "ສະບາຍດີ! ຂ້ອຍຈະຊ່ວຍທ່ານໃນການຢັ້ງຢືນຕົວຕົນ..."
+    "success": true,
+    "response": "ສະບາຍດີ! ຂ້ອຍຈະຊ່ວຍທ່ານໃນການຢັ້ງຢືນຕົວຕົນ..."
 }
 ```
 
 #### POST /chat-stream
+
 Send a chat message with streaming response.
 
 **Request:**
+
 ```json
 {
-  "message": "ຊ່ວຍຂ້ອຍດ້ວຍ"
+    "message": "ຊ່ວຍຂ້ອຍດ້ວຍ"
 }
 ```
 
 **Response:** Server-Sent Events (SSE)
+
 ```
 data: {"type": "thinking", "content": "ກຳລັງຄິດ..."}
 
@@ -372,99 +387,114 @@ data: [DONE]
 ```
 
 #### POST /reset
+
 Reset conversation history.
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "message": "ໄດ້ reset ການສົນທະນາແລ້ວ"
+    "success": true,
+    "message": "ໄດ້ reset ການສົນທະນາແລ້ວ"
 }
 ```
 
 ### File Upload Endpoints
 
 #### POST /upload
+
 Upload and process ID card image.
 
 **Request:** multipart/form-data
-- `file`: Image file (PNG, JPG, JPEG)
+
+-   `file`: Image file (PNG, JPG, JPEG)
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "image_url": "http://...",
-  "scan_result": {
-    "id": "...",
-    "name": "...",
-    "dob": "...",
-    "address": "..."
-  },
-  "formatted_html": "<div>...</div>",
-  "message": "ອັບໂຫຼດ ແລະ ສະແກນສຳເລັດ!"
+    "success": true,
+    "image_url": "http://...",
+    "scan_result": {
+        "id": "...",
+        "name": "...",
+        "dob": "...",
+        "address": "..."
+    },
+    "formatted_html": "<div>...</div>",
+    "message": "ອັບໂຫຼດ ແລະ ສະແກນສຳເລັດ!"
 }
 ```
 
 ### Face Verification Endpoints
 
 #### POST /verify-face
+
 Batch face verification.
 
 **Request:**
+
 ```json
 {
-  "id_card_image_url": "http://...",
-  "selfie_image_url": "http://..."
+    "id_card_image_url": "http://...",
+    "selfie_image_url": "http://..."
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "result": {
-    "same_person": true,
-    "similarity": 0.95,
-    "status": "success"
-  }
+    "success": true,
+    "result": {
+        "same_person": true,
+        "similarity": 0.95,
+        "status": "success"
+    }
 }
 ```
 
 #### POST /verify-face-realtime
+
 Real-time face verification.
 
 **Request/Response:** Same as `/verify-face`
 
 #### POST /start-websocket-verification
+
 Initialize WebSocket verification session.
 
 **Request:**
+
 ```json
 {
-  "id_card_image_url": "http://..."
+    "id_card_image_url": "http://..."
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "message": "ເລີ່ມການຢັ້ງຢືນ WebSocket ສຳເລັດແລ້ວ"
+    "success": true,
+    "message": "ເລີ່ມການຢັ້ງຢືນ WebSocket ສຳເລັດແລ້ວ"
 }
 ```
 
 #### POST /send-frame
+
 Send frame for real-time verification.
 
 **Request:**
+
 ```json
 {
-  "frame_base64": "data:image/jpeg;base64,..."
+    "frame_base64": "data:image/jpeg;base64,..."
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -478,85 +508,99 @@ Send frame for real-time verification.
 ```
 
 #### POST /stop-websocket-verification
+
 Stop WebSocket verification.
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "message": "ຢຸດການຢັ້ງຢືນ WebSocket ແລ້ວ"
+    "success": true,
+    "message": "ຢຸດການຢັ້ງຢືນ WebSocket ແລ້ວ"
 }
 ```
 
 ### Data Management Endpoints
 
 #### POST /cleanup
+
 Manual cleanup of eKYC data.
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "message": "ລ້າງຂໍ້ມູນສຳເລັດ"
+    "success": true,
+    "message": "ລ້າງຂໍ້ມູນສຳເລັດ"
 }
 ```
 
 #### POST /reset-all
+
 Reset all data and files.
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "message": "Reset ທັງໝົດສຳເລັດ"
+    "success": true,
+    "message": "Reset ທັງໝົດສຳເລັດ"
 }
 ```
 
 #### GET /storage-info
+
 Get storage information.
 
 **Response:**
+
 ```json
 {
-  "upload_folder": "uploads",
-  "files_count": 5,
-  "total_size": 1234567
+    "upload_folder": "uploads",
+    "files_count": 5,
+    "total_size": 1234567
 }
 ```
 
 #### POST /schedule-cleanup
+
 Schedule automatic cleanup.
 
 **Request:**
+
 ```json
 {
-  "delay_seconds": 30
+    "delay_seconds": 30
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "message": "ກຳນົດເວລາລ້າງຂໍ້ມູນສຳເລັດ"
+    "success": true,
+    "message": "ກຳນົດເວລາລ້າງຂໍ້ມູນສຳເລັດ"
 }
 ```
 
 ### Debug Endpoints
 
 #### GET /
+
 Main application page.
 
 #### GET /debug
+
 Application debug information.
 
 **Response:**
+
 ```json
 {
-  "static_folder": "/path/to/static",
-  "static_url_path": "/static",
-  "css_exists": true,
-  "css_path": "/path/to/css/style.css"
+    "static_folder": "/path/to/static",
+    "static_url_path": "/static",
+    "css_exists": true,
+    "css_path": "/path/to/css/style.css"
 }
 ```
 
@@ -569,9 +613,10 @@ Application debug information.
 #### Configuration Management (`backend/config/`)
 
 **settings.py**: Centralized configuration management
-- Loads settings from environment variables
-- Provides validation and default values
-- Exports singleton `settings` instance
+
+-   Loads settings from environment variables
+-   Provides validation and default values
+-   Exports singleton `settings` instance
 
 ```python
 from backend.config import settings
@@ -583,76 +628,88 @@ print(settings.API_KEY)     # your-api-key
 #### Data Models (`backend/models/`)
 
 **conversation.py**: Chat conversation models
-- `Message`: Individual message in conversation
-- `Conversation`: Manages conversation history and context
-- Progress tracking and context management
+
+-   `Message`: Individual message in conversation
+-   `Conversation`: Manages conversation history and context
+-   Progress tracking and context management
 
 **verification.py**: Verification data models
-- `ScanResult`: OCR scan results
-- `VerificationResult`: Face verification results
+
+-   `ScanResult`: OCR scan results
+-   `VerificationResult`: Face verification results
 
 #### Service Layer (`backend/services/`)
 
 **ai_service.py**: AI chatbot service
-- Streaming chat responses with thinking/reasoning
-- Tool call management and execution
-- Conversation history management
-- Integration with Gemini 2.5 Flash Lite
+
+-   Streaming chat responses with thinking/reasoning
+-   Tool call management and execution
+-   Conversation history management
+-   Integration with Gemini 2.5 Flash Lite
 
 **ocr_service.py**: OCR document processing
-- Image upload and processing
-- Data extraction from ID cards
-- URL-based and file-based scanning
+
+-   Image upload and processing
+-   Data extraction from ID cards
+-   URL-based and file-based scanning
 
 **face_verification_service.py**: Facial verification
-- Batch verification (single image comparison)
-- Real-time verification (WebSocket streaming)
-- Similarity scoring and confidence metrics
+
+-   Batch verification (single image comparison)
+-   Real-time verification (WebSocket streaming)
+-   Similarity scoring and confidence metrics
 
 **cleanup_service.py**: Data cleanup service
-- Automatic cleanup scheduling
-- Manual cleanup triggers
-- Storage monitoring and management
+
+-   Automatic cleanup scheduling
+-   Manual cleanup triggers
+-   Storage monitoring and management
 
 #### Core Business Logic (`backend/core/`)
 
 **bot.py**: Main orchestrator (`LaosEKYCBot`)
-- Coordinates all services
-- Manages conversation flow
-- Handles tool calls and responses
-- Progress tracking and state management
+
+-   Coordinates all services
+-   Manages conversation flow
+-   Handles tool calls and responses
+-   Progress tracking and state management
 
 #### API Layer (`backend/api/`)
 
 **routes.py**: Flask routes and endpoints
-- REST API definitions
-- WebSocket handlers
-- File upload handling
-- Error handling and responses
 
-**__init__.py**: Application factory
-- Creates and configures Flask app
-- Registers routes and middleware
-- Sets up CORS and static files
+-   REST API definitions
+-   WebSocket handlers
+-   File upload handling
+-   Error handling and responses
+
+\***\*init**.py\*\*: Application factory
+
+-   Creates and configures Flask app
+-   Registers routes and middleware
+-   Sets up CORS and static files
 
 ### Frontend Structure
 
 **index.html**: Main application page
-- Chat interface
-- File upload UI
-- Camera modal for face verification
-- Result display components
+
+-   Chat interface
+-   File upload UI
+-   Camera modal for face verification
+-   Result display components
 
 **assets/css/**: Stylesheets
-- Responsive design
-- Custom components styling
-- Mobile-friendly layout
+
+-   Responsive design
+-   Custom components styling
+-   Mobile-friendly layout
 
 **assets/js/**: JavaScript modules
-- API communication
-- Chat handling
-- Camera operations
-- WebSocket management
+
+-   API communication
+-   Chat handling
+-   Camera operations
+-   WebSocket management
 
 ---
 
@@ -687,34 +744,39 @@ python main.py
 ### Code Architecture Principles
 
 1. **Separation of Concerns**
-   - Each module has a single, well-defined responsibility
-   - Clear boundaries between layers (API, Core, Services, Models)
+
+    - Each module has a single, well-defined responsibility
+    - Clear boundaries between layers (API, Core, Services, Models)
 
 2. **Dependency Injection**
-   - Services are injected into core modules
-   - Loose coupling between components
-   - Easy to test and mock
+
+    - Services are injected into core modules
+    - Loose coupling between components
+    - Easy to test and mock
 
 3. **Configuration Management**
-   - Centralized configuration in `backend/config/settings.py`
-   - Environment-based configuration
-   - Validation on startup
+
+    - Centralized configuration in `backend/config/settings.py`
+    - Environment-based configuration
+    - Validation on startup
 
 4. **Error Handling**
-   - Consistent error handling patterns
-   - Meaningful error messages in Lao language
-   - Proper HTTP status codes
+
+    - Consistent error handling patterns
+    - Meaningful error messages in Lao language
+    - Proper HTTP status codes
 
 5. **Testing**
-   - Unit tests for individual components
-   - Integration tests for API endpoints
-   - Test coverage tracking
+    - Unit tests for individual components
+    - Integration tests for API endpoints
+    - Test coverage tracking
 
 ### Adding New Features
 
 #### Backend Feature
 
 1. **Add Model** (if needed)
+
 ```python
 # backend/models/new_feature.py
 class NewFeatureModel:
@@ -723,18 +785,20 @@ class NewFeatureModel:
 ```
 
 2. **Add Service**
+
 ```python
 # backend/services/new_feature_service.py
 class NewFeatureService:
     def __init__(self, config):
         self.config = config
-    
+
     def process(self, data):
         # Implementation
         pass
 ```
 
 3. **Update Core Bot**
+
 ```python
 # backend/core/bot.py
 from backend.services.new_feature_service import NewFeatureService
@@ -746,6 +810,7 @@ class LaosEKYCBot:
 ```
 
 4. **Add API Route**
+
 ```python
 # backend/api/routes.py
 @app.route('/new-feature', methods=['POST'])
@@ -756,6 +821,7 @@ def new_feature():
 ```
 
 5. **Add Tests**
+
 ```python
 # tests/unit/test_new_feature.py
 def test_new_feature():
@@ -767,6 +833,7 @@ def test_new_feature():
 #### Frontend Feature
 
 1. **Add HTML Component**
+
 ```html
 <!-- frontend/index.html -->
 <div id="new-feature">
@@ -775,6 +842,7 @@ def test_new_feature():
 ```
 
 2. **Add Styling**
+
 ```css
 /* frontend/assets/css/style.css */
 #new-feature {
@@ -783,13 +851,14 @@ def test_new_feature():
 ```
 
 3. **Add JavaScript**
+
 ```javascript
 // frontend/assets/js/main.js
 async function handleNewFeature(data) {
-    const response = await fetch('/new-feature', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
+    const response = await fetch("/new-feature", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
     });
     return await response.json();
 }
@@ -797,14 +866,14 @@ async function handleNewFeature(data) {
 
 ### Code Style Standards
 
-- **Python**: Follow PEP 8 guidelines
-- **Type Hints**: Use type hints for function parameters and return values
-- **Docstrings**: Document all classes and functions
-- **Comments**: Add comments for complex logic
-- **Naming**: Use descriptive variable and function names
-  - Classes: `PascalCase`
-  - Functions: `snake_case`
-  - Constants: `UPPER_SNAKE_CASE`
+-   **Python**: Follow PEP 8 guidelines
+-   **Type Hints**: Use type hints for function parameters and return values
+-   **Docstrings**: Document all classes and functions
+-   **Comments**: Add comments for complex logic
+-   **Naming**: Use descriptive variable and function names
+    -   Classes: `PascalCase`
+    -   Functions: `snake_case`
+    -   Constants: `UPPER_SNAKE_CASE`
 
 ### Git Workflow
 
@@ -924,18 +993,18 @@ docker run -p 5001:5001 --env-file .env laos-ekyc
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 
 services:
-  web:
-    build: .
-    ports:
-      - "5001:5001"
-    env_file:
-      - .env
-    volumes:
-      - ./uploads:/app/uploads
-    restart: unless-stopped
+    web:
+        build: .
+        ports:
+            - "5001:5001"
+        env_file:
+            - .env
+        volumes:
+            - ./uploads:/app/uploads
+        restart: unless-stopped
 ```
 
 ```bash
@@ -946,12 +1015,14 @@ docker-compose up -d
 ### Environment-Specific Configuration
 
 #### Development
+
 ```env
 FLASK_DEBUG=True
 FLASK_HOST=127.0.0.1
 ```
 
 #### Production
+
 ```env
 FLASK_DEBUG=False
 FLASK_HOST=0.0.0.0
@@ -986,47 +1057,52 @@ server {
 ### Best Practices
 
 1. **API Keys**: Never commit API keys to version control
-   - Use environment variables
-   - Use secret management services in production
+
+    - Use environment variables
+    - Use secret management services in production
 
 2. **File Upload Security**
-   - Validate file types and sizes
-   - Scan uploaded files for malware
-   - Use secure filename generation
-   - Clean up temporary files
+
+    - Validate file types and sizes
+    - Scan uploaded files for malware
+    - Use secure filename generation
+    - Clean up temporary files
 
 3. **Session Security**
-   - Use strong secret keys
-   - Enable HTTPS in production
-   - Set secure cookie flags
+
+    - Use strong secret keys
+    - Enable HTTPS in production
+    - Set secure cookie flags
 
 4. **Data Privacy**
-   - Implement automatic data cleanup
-   - Encrypt sensitive data at rest
-   - Use secure connections for external services
+
+    - Implement automatic data cleanup
+    - Encrypt sensitive data at rest
+    - Use secure connections for external services
 
 5. **Input Validation**
-   - Validate all user inputs
-   - Sanitize data before processing
-   - Use parameterized queries (if using database)
+
+    - Validate all user inputs
+    - Sanitize data before processing
+    - Use parameterized queries (if using database)
 
 6. **Error Handling**
-   - Don't expose sensitive information in error messages
-   - Log errors securely
-   - Use appropriate HTTP status codes
+    - Don't expose sensitive information in error messages
+    - Log errors securely
+    - Use appropriate HTTP status codes
 
 ### Security Checklist
 
-- [ ] Change default `FLASK_SECRET_KEY`
-- [ ] Enable HTTPS in production
-- [ ] Set `FLASK_DEBUG=False` in production
-- [ ] Implement rate limiting
-- [ ] Add authentication/authorization (if needed)
-- [ ] Regular security audits
-- [ ] Keep dependencies updated
-- [ ] Implement logging and monitoring
-- [ ] Configure firewall rules
-- [ ] Regular backups
+-   [ ] Change default `FLASK_SECRET_KEY`
+-   [ ] Enable HTTPS in production
+-   [ ] Set `FLASK_DEBUG=False` in production
+-   [ ] Implement rate limiting
+-   [ ] Add authentication/authorization (if needed)
+-   [ ] Regular security audits
+-   [ ] Keep dependencies updated
+-   [ ] Implement logging and monitoring
+-   [ ] Configure firewall rules
+-   [ ] Regular backups
 
 ---
 
@@ -1039,6 +1115,7 @@ server {
 **Error**: `Configuration error: Missing required setting: API_KEY`
 
 **Solution**:
+
 ```bash
 # Check .env file exists
 ls -la .env
@@ -1055,6 +1132,7 @@ echo "API_KEY=your-key-here" >> .env
 **Error**: `Address already in use: 5001`
 
 **Solution**:
+
 ```bash
 # Find process using port
 lsof -i :5001
@@ -1063,7 +1141,7 @@ lsof -i :5001
 kill -9 <PID>
 
 # Or use different port
-export FLASK_PORT=5002
+export FLASK_PORT=5001
 python main.py
 ```
 
@@ -1072,29 +1150,32 @@ python main.py
 **Error**: `Connection refused` or `Timeout`
 
 **Solution**:
-- Verify OCR service is running
-- Check OCR_*_URL configuration
-- Test connectivity: `curl http://ocr-server:8000/health`
-- Check firewall settings
+
+-   Verify OCR service is running
+-   Check OCR\_\*\_URL configuration
+-   Test connectivity: `curl http://ocr-server:8000/health`
+-   Check firewall settings
 
 #### Issue: File upload fails
 
 **Error**: `File too large` or `Invalid file type`
 
 **Solution**:
-- Check file size < 16MB
-- Verify file type is PNG, JPG, or JPEG
-- Check `UPLOAD_FOLDER` exists and is writable
+
+-   Check file size < 16MB
+-   Verify file type is PNG, JPG, or JPEG
+-   Check `UPLOAD_FOLDER` exists and is writable
 
 #### Issue: WebSocket connection fails
 
 **Error**: `WebSocket connection failed`
 
 **Solution**:
-- Verify `OCR_WEBSOCKET_URL` is correct
-- Check WebSocket server is running
-- Test WebSocket connectivity
-- Check firewall allows WebSocket connections
+
+-   Verify `OCR_WEBSOCKET_URL` is correct
+-   Check WebSocket server is running
+-   Test WebSocket connectivity
+-   Check firewall allows WebSocket connections
 
 ### Debug Mode
 
@@ -1129,56 +1210,63 @@ We welcome contributions! Please follow these guidelines:
 ### How to Contribute
 
 1. **Fork the Repository**
-   ```bash
-   git clone https://github.com/your-username/Laos_Agent.git
-   cd Laos_Agent
-   ```
+
+    ```bash
+    git clone https://github.com/your-username/Laos_Agent.git
+    cd Laos_Agent
+    ```
 
 2. **Create a Feature Branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
+
+    ```bash
+    git checkout -b feature/amazing-feature
+    ```
 
 3. **Make Your Changes**
-   - Follow code style standards
-   - Add tests for new features
-   - Update documentation
+
+    - Follow code style standards
+    - Add tests for new features
+    - Update documentation
 
 4. **Run Tests**
-   ```bash
-   pytest
-   ```
+
+    ```bash
+    pytest
+    ```
 
 5. **Commit Your Changes**
-   ```bash
-   git add .
-   git commit -m "feat: Add amazing feature"
-   ```
+
+    ```bash
+    git add .
+    git commit -m "feat: Add amazing feature"
+    ```
 
 6. **Push to Your Fork**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
+
+    ```bash
+    git push origin feature/amazing-feature
+    ```
 
 7. **Create a Pull Request**
-   - Go to GitHub
-   - Click "New Pull Request"
-   - Describe your changes
-   - Submit for review
+    - Go to GitHub
+    - Click "New Pull Request"
+    - Describe your changes
+    - Submit for review
 
 ### Commit Message Guidelines
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-- `feat:` New feature
-- `fix:` Bug fix
-- `docs:` Documentation changes
-- `style:` Code style changes (formatting)
-- `refactor:` Code refactoring
-- `test:` Adding or updating tests
-- `chore:` Maintenance tasks
+-   `feat:` New feature
+-   `fix:` Bug fix
+-   `docs:` Documentation changes
+-   `style:` Code style changes (formatting)
+-   `refactor:` Code refactoring
+-   `test:` Adding or updating tests
+-   `chore:` Maintenance tasks
 
 Examples:
+
 ```
 feat: Add real-time face verification
 fix: Resolve WebSocket connection issue
@@ -1207,25 +1295,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For technical support and questions:
 
-- 📧 Email: support@example.com
-- 💬 Discord: [Join our server](#)
-- 📝 Issues: [GitHub Issues](https://github.com/PhucHuwu/Laos_Agent/issues)
+-   📧 Email: support@example.com
+-   💬 Discord: [Join our server](#)
+-   📝 Issues: [GitHub Issues](https://github.com/PhucHuwu/Laos_Agent/issues)
 
 ### Documentation
 
-- 📖 [Full Documentation](docs/)
-- 🎓 [User Guide](docs/user-guide.md)
-- 🔧 [Developer Guide](docs/developer-guide.md)
-- 📡 [API Reference](docs/api-reference.md)
+-   📖 [Full Documentation](docs/)
+-   🎓 [User Guide](docs/user-guide.md)
+-   🔧 [Developer Guide](docs/developer-guide.md)
+-   📡 [API Reference](docs/api-reference.md)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Google Gemini for AI capabilities
-- Flask community for excellent web framework
-- OCR service providers
-- All contributors and supporters
+-   Google Gemini for AI capabilities
+-   Flask community for excellent web framework
+-   OCR service providers
+-   All contributors and supporters
 
 ---
 
