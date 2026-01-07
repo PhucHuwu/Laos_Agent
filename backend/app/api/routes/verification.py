@@ -43,7 +43,7 @@ async def verify_face(
 
             # Check verification result
             if result_data.get("same_person") is True:
-                bot.conversation.set_progress("completed")
+                bot.conversation.set_progress("idle")
                 bot.conversation.set_context("verification_success", True)
                 print(f"Verification successful, progress: {bot.conversation.progress}")
             else:

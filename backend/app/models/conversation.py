@@ -38,7 +38,7 @@ class Conversation(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     context: Dict[str, Any] = Field(default_factory=dict)
-    progress: Literal["idle", "id_uploaded", "id_scanned", "face_verifying", "completed"] = "idle"
+    progress: Literal["idle", "id_uploading", "id_scanned", "face_verifying"] = "idle"
 
     def add_message(self, message: Message) -> None:
         """Add a message to the conversation"""
@@ -79,7 +79,7 @@ class Conversation(BaseModel):
 
     def set_progress(self, progress: str) -> None:
         """Set eKYC progress"""
-        valid_progress = ["idle", "id_uploaded", "id_scanned", "face_verifying", "completed"]
+        valid_progress = ["idle", "id_uploading", "id_scanned", "face_verifying"]
         if progress in valid_progress:
             self.progress = progress
             self.updated_at = datetime.now()

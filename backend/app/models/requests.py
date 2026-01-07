@@ -40,7 +40,7 @@ class UploadResponse(BaseModel):
     formatted_html: Optional[str] = None
     message: Optional[str] = None
     id_card_url: Optional[str] = None
-    auto_open_camera: bool = False
+    tool_call: Optional[Dict[str, Any]] = None  # Tool call for frontend to execute
     error: Optional[str] = None
 
 

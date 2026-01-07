@@ -42,35 +42,33 @@ export function ChatContainer() {
         (toolCalls: any[]) => {
             for (const toolCall of toolCalls) {
                 const functionName = toolCall?.function?.name;
-                if (functionName === "start_ekyc_process") {
-                    try {
-                        const args = JSON.parse(toolCall.function.arguments || "{}");
-                        if (args.message) {
-                            addMessage({
-                                id: Math.random().toString(36).slice(2),
-                                role: "assistant",
-                                content: args.message,
-                                timestamp: new Date(),
-                            });
-                        }
-                    } catch (e) {
-                        console.error("Error parsing tool call arguments:", e);
-                    }
 
-                    // Check current progress to decide which modal to open
-                    setTimeout(() => {
-                        if (progress === "id_scanned" && idCardUrl) {
-                            // ID already scanned, open camera for face verification
-                            openCameraModal();
-                        } else {
-                            // Need to upload/scan ID first
-                            openUploadModal();
-                        }
-                    }, 500);
+                // Parse message from tool call arguments
+                try {
+                    const args = JSON.parse(toolCall.function?.arguments || "{}");
+                    if (args.message) {
+                        addMessage({
+                            id: Math.random().toString(36).slice(2),
+                            role: "assistant",
+                            content: args.message,
+                            timestamp: new Date(),
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error parsing tool call arguments:", e);
                 }
+
+                // Execute tool action based on function name
+                setTimeout(() => {
+                    if (functionName === "open_id_scan") {
+                        openUploadModal();
+                    } else if (functionName === "open_face_verification") {
+                        openCameraModal();
+                    }
+                }, 500);
             }
         },
-        [addMessage, openUploadModal, openCameraModal, progress, idCardUrl]
+        [addMessage, openUploadModal, openCameraModal]
     );
 
     const handleSendMessage = async (message: string) => {
@@ -153,9 +151,9 @@ export function ChatContainer() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-background">
+        <div className="flex flex-col h-screen bg-background overflow-hidden">
             <Header />
-            <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-4">
+            <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-4 min-h-0 overflow-hidden">
                 <ChatBox />
                 {messages.length <= 1 && <QuickActions onAction={handleQuickAction} isLoading={isLoading} />}
             </div>

@@ -68,7 +68,13 @@ async def upload_file(
                 formatted_html=formatted_html,
                 message="Upload and scan successful!",
                 id_card_url=result.get("image_url"),
-                auto_open_camera=True,
+                tool_call={
+                    "function": {
+                        "name": "open_face_verification",
+                        "arguments": "{\"message\": \"ກະລຸນາຖ່າຍຮູບໃບໜ້າຂອງທ່ານເພື່ອຢັ້ງຢືນຕົວຕົນ\"}"
+                    },
+                    "auto_execute": True
+                }
             )
         else:
             print(f"OCR failed: {result.get('error')}")

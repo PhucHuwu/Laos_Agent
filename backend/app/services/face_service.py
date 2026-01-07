@@ -1,5 +1,5 @@
 """
-Face Verification Service - Using websocket-client (threading-based) like old code
+Face Verification Service - Using websocket-client (threading-based)
 """
 
 import asyncio

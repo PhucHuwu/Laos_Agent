@@ -13,7 +13,10 @@ export const uploadApi = {
             formatted_html?: string;
             message?: string;
             id_card_url?: string;
-            auto_open_camera?: boolean;
+            tool_call?: {
+                function?: { name?: string; arguments?: string };
+                auto_execute?: boolean;
+            };
             error?: string;
         }>("/upload", formData, {
             headers: {

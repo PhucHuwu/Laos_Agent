@@ -31,31 +31,35 @@ ABSOLUTE LANGUAGE RULE:
 - NO EXCEPTIONS: Even if user writes in English, Vietnamese, Thai, Chinese, or any other language
 - THIS IS NON-NEGOTIABLE: Every single response must be in Lao only
 
-UNDERSTANDING eKYC PROCESS STATES:
-You will receive context messages indicating current eKYC progress state:
-
-1. "idle" - User has not started eKYC process yet
-2. "id_uploaded" - User uploaded ID card image, waiting for scan
-3. "id_scanned" - ID card scanned successfully, data extracted
+eKYC PROGRESS STATES:
+1. "idle" - User has not started OR just completed eKYC
+2. "id_uploading" - User is uploading ID card image  
+3. "id_scanned" - ID card scanned successfully, ready for face verification
 4. "face_verifying" - User is in face verification process
-5. "completed" - eKYC process completed successfully
 
-INTENT RECOGNITION:
-You have ONE powerful tool: start_ekyc_process
+TOOL USAGE RULES:
+You have 2 tools to manage the eKYC flow:
 
-INTENT 1: INFORMATION SEEKING (Just answer, NO tool call)
-- Questions about what eKYC is, how it works, security, requirements
+1. open_id_scan - Opens ID card upload modal
+   USE WHEN: progress is "idle" AND user wants to start/restart eKYC
+   
+2. open_face_verification - Opens camera for face verification  
+   USE WHEN: progress is "id_scanned" AND user wants to:
+   - Continue face verification (e.g., closed camera accidentally)
+   - Retry face verification
 
-INTENT 2: ACTION INITIATION (Call start_ekyc_process tool)
-- User expresses readiness to begin, desire to start, willingness to proceed
+EXCEPTION HANDLING:
+- If user at "id_scanned" wants to re-scan ID: use open_id_scan
+- If user closed camera popup: use open_face_verification when asked
+- If user wants to start over: use open_id_scan
 
 KEY PRINCIPLES:
 1. Use semantic understanding, not keyword matching
-2. Consider conversation flow and current state
-3. Understand natural language and implied meanings
-4. Always respond in Lao language
+2. Always check current progress state before calling tools
+3. Provide helpful guidance in Lao language
+4. Be professional and friendly
 
-Act as a professional, knowledgeable, and friendly eKYC consultant."""
+Act as a professional eKYC consultant."""
 
         system_message = Message(role="system", content=system_content)
         self.conversation.add_message(system_message)
@@ -66,14 +70,31 @@ Act as a professional, knowledgeable, and friendly eKYC consultant."""
             {
                 "type": "function",
                 "function": {
-                    "name": "start_ekyc_process",
-                    "description": "Initiates the complete eKYC verification flow (ID upload -> scan -> face verification). Use this when you recognize USER'S INTENT TO ACT - when they express readiness, desire to begin, or willingness to proceed with identity verification.",
+                    "name": "open_id_scan",
+                    "description": "Opens the ID card upload/scan modal. Use when: (1) progress is 'idle' and user wants to START eKYC, OR (2) user explicitly wants to re-scan/re-upload their ID card.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "message": {
                                 "type": "string",
-                                "description": "Welcoming message in Lao language to guide user into the eKYC process"
+                                "description": "Guidance message in Lao language for uploading ID card"
+                            }
+                        },
+                        "required": ["message"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "open_face_verification",
+                    "description": "Opens the camera modal for face verification. Use when: (1) progress is 'id_scanned' and user wants to proceed with face matching, OR (2) user closed camera accidentally and wants to continue.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "description": "Guidance message in Lao language for face verification"
                             }
                         },
                         "required": ["message"]
@@ -86,11 +107,10 @@ Act as a professional, knowledgeable, and friendly eKYC consultant."""
         """Generate context message based on current state"""
         progress_summary = self.conversation.get_progress_summary()
         progress_descriptions = {
-            "idle": "User has not started eKYC process yet",
-            "id_uploaded": "User has uploaded ID card image but not scanned yet",
+            "idle": "User has not started eKYC process yet (or just completed and reset)",
+            "id_uploading": "User is uploading ID card image",
             "id_scanned": "User has successfully scanned ID card, extracted information is available",
-            "face_verifying": "User is currently in face verification process",
-            "completed": "User has completed eKYC process successfully"
+            "face_verifying": "User is currently in face verification process"
         }
 
         context_parts = [
@@ -115,13 +135,6 @@ Act as a professional, knowledgeable, and friendly eKYC consultant."""
 
     async def chat(self, user_input: str) -> Dict[str, Any]:
         """Process user input and return AI response (non-streaming)"""
-        # Auto-reset to idle if previous session was completed
-        # This allows user to start new eKYC session naturally
-        if self.conversation.progress == "completed":
-            self.conversation.set_progress("idle")
-            self.conversation.context = {}  # Clear old context
-            print("[RESET] Previous eKYC completed - reset to idle for new session")
-        
         # Add user message to conversation
         user_message = Message(role="user", content=user_input)
         self.conversation.add_message(user_message)
@@ -176,13 +189,6 @@ Act as a professional, knowledgeable, and friendly eKYC consultant."""
 
     async def chat_stream(self, user_input: str) -> AsyncGenerator[Dict[str, Any], None]:
         """Process user input and return streaming AI response"""
-        # Auto-reset to idle if previous session was completed
-        # This allows user to start new eKYC session naturally
-        if self.conversation.progress == "completed":
-            self.conversation.set_progress("idle")
-            self.conversation.context = {}  # Clear old context
-            print("[RESET] Previous eKYC completed - reset to idle for new session")
-        
         # Add user message to conversation
         user_message = Message(role="user", content=user_input)
         self.conversation.add_message(user_message)

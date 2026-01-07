@@ -128,22 +128,36 @@ export function UploadModal() {
                     timestamp: new Date(),
                 });
 
-                // Close modal and open camera if auto_open_camera
+                // Close modal and handle tool_call if present
                 setTimeout(() => {
                     closeUploadModal();
                     setPreview(null);
                     setSelectedFile(null);
                     setUploadProgress(0);
 
-                    if (response.auto_open_camera && imageUrl) {
-                        // Add message before opening camera
-                        addMessage({
-                            id: Math.random().toString(36).slice(2),
-                            role: "assistant",
-                            content: "ກະລຸນາຢັ້ງຢືນໃບໜ້າຂອງທ່ານເພື່ອສຳເລັດຂະບວນການ eKYC.",
-                            timestamp: new Date(),
-                        });
-                        openCameraModal();
+                    // Handle tool_call from backend
+                    if (response.tool_call && response.tool_call.auto_execute) {
+                        const toolName = response.tool_call.function?.name;
+
+                        // Parse message from tool call
+                        try {
+                            const args = JSON.parse(response.tool_call.function?.arguments || "{}");
+                            if (args.message) {
+                                addMessage({
+                                    id: Math.random().toString(36).slice(2),
+                                    role: "assistant",
+                                    content: args.message,
+                                    timestamp: new Date(),
+                                });
+                            }
+                        } catch (e) {
+                            console.error("Error parsing tool_call arguments:", e);
+                        }
+
+                        // Execute tool action
+                        if (toolName === "open_face_verification") {
+                            openCameraModal();
+                        }
                     }
                 }, 1000);
             } else {

@@ -58,13 +58,22 @@ class LaosEKYCBot:
             function_name = tool_call["function"]["name"]
             arguments = json.loads(tool_call["function"]["arguments"])
 
-            if function_name == "start_ekyc_process":
-                message = arguments.get("message", "! eKYC")
+            if function_name == "open_id_scan":
+                message = arguments.get("message", "ກະລຸນາອັບໂຫລດບັດປະຈຳຕົວ")
                 return {
                     "success": True,
-                    "action": "start_ekyc_flow",
+                    "action": "open_id_scan",
                     "message": message,
-                    "tool_call_id": tool_call["id"]
+                    "tool_call_id": tool_call.get("id")
+                }
+            
+            elif function_name == "open_face_verification":
+                message = arguments.get("message", "ກະລຸນາຢັ້ງຢືນໃບໜ້າ")
+                return {
+                    "success": True,
+                    "action": "open_face_verification", 
+                    "message": message,
+                    "tool_call_id": tool_call.get("id")
                 }
 
             return {
@@ -126,7 +135,7 @@ class LaosEKYCBot:
             # Check verification result
             if result_data.get("same_person") is True:
                 self.conversation.set_context("verification_success", True)
-                self.conversation.set_progress("completed")
+                self.conversation.set_progress("idle")
                 print(f"Verification successful, progress: {self.conversation.progress}")
             else:
                 # Verification failed - revert to id_scanned
