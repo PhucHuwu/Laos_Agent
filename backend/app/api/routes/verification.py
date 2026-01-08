@@ -6,7 +6,7 @@ import asyncio
 import json
 import websockets
 from fastapi import APIRouter, Depends
-from app.api.deps import get_session_id, get_bot
+from app.api.deps import get_session_id, get_bot, delete_bot_session
 from app.models.requests import (
     VerifyFaceRequest,
     VerifyFaceResponse,
@@ -43,9 +43,9 @@ async def verify_face(
 
             # Check verification result
             if result_data.get("same_person") is True:
-                bot.conversation.set_progress("idle")
-                bot.conversation.set_context("verification_success", True)
-                print(f"Verification successful, progress: {bot.conversation.progress}")
+                # Delete bot session completely - next request will create fresh instance
+                delete_bot_session(session_id)
+                print(f"Verification successful, bot session deleted for: {session_id}")
             else:
                 bot.conversation.set_progress("id_scanned")
                 print(f"Verification failed, progress reverted: {bot.conversation.progress}")
@@ -77,7 +77,7 @@ async def start_websocket_verification(
     print("="*80)
     print(f"[SESSION] Session ID: {session_id}")
     print(f"[IMAGE]  ID Card Image URL: {request.id_card_image_url}")
-    
+
     bot = get_bot(session_id)
     print(f"[BOT] Bot instance: {bot}")
     print(f"[SERVICE] Face verification service: {bot.face_verification_service}")
@@ -87,7 +87,7 @@ async def start_websocket_verification(
         # Run sync method in thread executor to avoid blocking
         loop = asyncio.get_event_loop()
         websocket_client = await loop.run_in_executor(
-            None, 
+            None,
             bot.start_realtime_verification,
             request.id_card_image_url
         )
@@ -98,7 +98,7 @@ async def start_websocket_verification(
             status = websocket_client.get_status()
             print(f"[DATA] Client Status:")
             print(json.dumps(status, indent=2))
-            
+
             if websocket_client.is_connected:
                 print("[OK] WebSocket verification started successfully!")
                 print("="*80 + "\n")
@@ -138,7 +138,7 @@ async def send_frame(
     print("\n" + "="*80)
     print("[FRAME] SEND FRAME REQUEST RECEIVED")
     print("="*80)
-    
+
     bot = get_bot(session_id)
     realtime_client = bot.face_verification_service.realtime_client
 
@@ -165,7 +165,7 @@ async def send_frame(
         if success:
             print("[OK] Frame sent successfully, waiting for result...")
             await asyncio.sleep(0.05)
-            
+
             # Try to get result
             result = realtime_client.get_last_result()
 
@@ -174,6 +174,11 @@ async def send_frame(
                 print("[OK] RESPONSE FROM WEBSOCKET (Valid):")
                 print(json.dumps(result, indent=2, ensure_ascii=False))
                 print("="*80 + "\n")
+
+                # Check if verification succeeded - delete session for fresh start
+                if result.get("same_person") is True:
+                    print(f"[RESET] Verification successful! Deleting bot session: {session_id}")
+                    delete_bot_session(session_id)
 
                 return FrameResponse(
                     success=True,

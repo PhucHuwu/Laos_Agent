@@ -86,6 +86,22 @@ class Conversation(BaseModel):
         else:
             raise ValueError(f"Invalid progress value. Must be one of: {', '.join(valid_progress)}")
 
+    def reset_ekyc_state(self) -> None:
+        """
+        Reset eKYC-related state after successful verification.
+        This clears ALL conversation data (messages + context) so that
+        the next eKYC session starts completely fresh.
+        """
+        # Clear all messages (will be re-initialized with system message by AIService)
+        self.messages.clear()
+
+        # Clear all context
+        self.context.clear()
+
+        # Reset progress to idle
+        self.progress = "idle"
+        self.updated_at = datetime.now()
+
     def get_progress_summary(self) -> Dict[str, Any]:
         """Get summary of current progress and context"""
         return {

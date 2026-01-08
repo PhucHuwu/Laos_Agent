@@ -66,12 +66,12 @@ class LaosEKYCBot:
                     "message": message,
                     "tool_call_id": tool_call.get("id")
                 }
-            
+
             elif function_name == "open_face_verification":
                 message = arguments.get("message", "ກະລຸນາຢັ້ງຢືນໃບໜ້າ")
                 return {
                     "success": True,
-                    "action": "open_face_verification", 
+                    "action": "open_face_verification",
                     "message": message,
                     "tool_call_id": tool_call.get("id")
                 }
@@ -134,9 +134,9 @@ class LaosEKYCBot:
 
             # Check verification result
             if result_data.get("same_person") is True:
-                self.conversation.set_context("verification_success", True)
-                self.conversation.set_progress("idle")
-                print(f"Verification successful, progress: {self.conversation.progress}")
+                # Session will be deleted by the route handler
+                # Just log success here
+                print(f"Face verification successful in bot.verify_face_from_urls")
             else:
                 # Verification failed - revert to id_scanned
                 self.conversation.set_progress("id_scanned")

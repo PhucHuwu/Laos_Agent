@@ -52,3 +52,19 @@ def get_bot(session_id: str) -> LaosEKYCBot:
     session_timestamps[session_id] = time.time()
 
     return bot_sessions[session_id]
+
+
+def delete_bot_session(session_id: str) -> bool:
+    """
+    Delete a bot session completely.
+    Use this after successful verification to ensure next session starts fresh.
+    Returns True if session was deleted, False if not found.
+    """
+    if session_id in bot_sessions:
+        del bot_sessions[session_id]
+        if session_id in session_timestamps:
+            del session_timestamps[session_id]
+        print(f"Deleted bot session: {session_id}")
+        return True
+    print(f"Session not found for deletion: {session_id}")
+    return False

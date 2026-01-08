@@ -133,10 +133,11 @@ export function CameraModal() {
             setTimeout(() => {
                 closeCameraModal();
                 stopCamera();
-                // Reset eKYC state for next user
+                // Reset eKYC state for next verification
+                // Note: Chat history is preserved on frontend, but backend session is deleted
                 setTimeout(() => {
                     resetEKYC();
-                    // Keep chat history - don't reset chat
+                    // Keep chat history on frontend
                 }, 500);
             }, 2000);
         } else {
