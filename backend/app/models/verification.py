@@ -47,6 +47,22 @@ class ScanResult(BaseModel):
             raw_data=data
         )
 
+    def is_successful(self) -> bool:
+        """Check if scan was successful and has valid data"""
+        title_check = False
+        if self.document_type:
+            title_check = True
+        
+        # Check if we have at least some fields extracted
+        fields_check = False
+        if self.fields and len(self.fields) > 0:
+            fields_check = True
+            
+        return (
+            self.status == "success" and
+            (title_check or fields_check)
+        )
+
 
 class VerificationResult(BaseModel):
     """Result from face verification"""

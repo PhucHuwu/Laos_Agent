@@ -115,6 +115,14 @@ class OCRService:
         # Scan image
         scan_result = await self.scan_image_from_url(image_url)
 
+        if not scan_result.is_successful():
+            return {
+                "success": False,
+                "error": "Could not detect ID card information. Please ensure image is clear and contains a valid ID.",
+                "image_url": image_url,
+                "scan_result": scan_result.model_dump()
+            }
+
         return {
             "success": True,
             "image_url": image_url,
