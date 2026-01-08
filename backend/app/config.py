@@ -16,13 +16,13 @@ class Settings(BaseSettings):
     MODEL: str = "z-ai/glm-4.5"
 
     # OCR API Configuration
-    OCR_UPLOAD_URL: str = "http://your-ocr-server:8000/api/v1/ocr/upload-image"
-    OCR_SCAN_URL: str = "http://your-ocr-server:8000/api/v1/ocr/scan-url"
-    OCR_WEBSOCKET_URL: str = "ws://your-ocr-server:8000/api/v1/ocr/ws/verify"
+    OCR_UPLOAD_URL: str = "http://your-ocr-server:3724/api/v1/ocr/upload-image"
+    OCR_SCAN_URL: str = "http://your-ocr-server:3724/api/v1/ocr/scan-url"
+    OCR_WEBSOCKET_URL: str = "ws://your-ocr-server:3724/api/v1/ocr/ws/verify"
 
     # Server Configuration
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    PORT: int = 3724
     DEBUG: bool = False
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
 

@@ -1,7 +1,7 @@
 import { apiClient } from "./client";
 import type { ChatResponse, ApiResponse } from "../types/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3724/api";
 
 export const chatApi = {
     sendMessage: async (message: string) => {

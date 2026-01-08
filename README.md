@@ -73,7 +73,7 @@ Laos_Agent/
 
 6. Start the backend server:
     ```bash
-    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    uvicorn app.main:app --reload --host 0.0.0.0 --port 3724
     ```
 
 ### Frontend Setup
