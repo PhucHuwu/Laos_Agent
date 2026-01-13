@@ -34,6 +34,12 @@ class OCRService:
                 response.raise_for_status()
                 return response.json()
 
+        except httpx.HTTPStatusError as e:
+            error_detail = e.response.text if e.response else str(e)
+            return {
+                "success": False,
+                "error": f"OCR Upload Error ({e.response.status_code}): {error_detail}"
+            }
         except httpx.RequestError as e:
             return {
                 "success": False,
@@ -71,6 +77,12 @@ class OCRService:
 
                 return ScanResult.from_api_response(result_data)
 
+        except httpx.HTTPStatusError as e:
+            error_detail = e.response.text if e.response else str(e)
+            return ScanResult(
+                status="error",
+                message=f"OCR Server Error ({e.response.status_code}): {error_detail}"
+            )
         except httpx.RequestError as e:
             return ScanResult(
                 status="error",
