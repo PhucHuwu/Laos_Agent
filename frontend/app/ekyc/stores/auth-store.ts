@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             });
             return true;
         } catch (error: any) {
-            const message = error.response?.data?.detail || "Đăng nhập thất bại";
+            const message = error.response?.data?.detail || "ການເຂົ້າສູ່ລະບົບລົ້ມເຫລວ";
             set({ error: message, isLoading: false });
             return false;
         }
@@ -66,7 +66,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             });
             return true;
         } catch (error: any) {
-            const message = error.response?.data?.detail || "Đăng ký thất bại";
+            const message = error.response?.data?.detail || "ການລົງທະບຽນລົ້ມເຫລວ";
             set({ error: message, isLoading: false });
             return false;
         }

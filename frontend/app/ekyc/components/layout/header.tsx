@@ -30,14 +30,14 @@ export function Header() {
                 </div>
                 <div className="text-center">
                     <h1 className="text-xl font-semibold">eKYC Laos</h1>
-                    <p className="text-sm text-muted-foreground">Xác minh danh tính điện tử</p>
+                    <p className="text-sm text-muted-foreground">ການຢັ້ງຢືນຕົວຕົນທາງເອເລັກໂຕຣນິກ</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="text-xs space-y-1">
                         <div className={`${statusInfo.color} text-white px-2 py-1 rounded-full text-center`}>{statusInfo.label}</div>
                     </div>
                     <button onClick={handleLogout} className="px-3 py-1.5 text-sm rounded-lg border border-border hover:bg-muted transition-colors">
-                        Đăng xuất
+                        ອອກຈາກລະບົບ
                     </button>
                 </div>
             </div>

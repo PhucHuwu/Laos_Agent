@@ -22,13 +22,13 @@ export default function RegisterPage() {
 
         // Validate password match
         if (password !== confirmPassword) {
-            setLocalError("Mật khẩu xác nhận không khớp");
+            setLocalError("ລະຫັດຜ່ານຢືນຢັນບໍ່ກົງກັນ");
             return;
         }
 
         // Validate password length
         if (password.length < 6) {
-            setLocalError("Mật khẩu phải có ít nhất 6 ký tự");
+            setLocalError("ລະຫັດຜ່ານຕ້ອງມີຢ່າງໜ້ອຍ 6 ຕົວອັກສອນ");
             return;
         }
 
@@ -42,35 +42,35 @@ export default function RegisterPage() {
         <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-xl shadow-lg border border-border">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold text-foreground">Đăng Ký</h1>
-                    <p className="text-muted-foreground mt-2">Tạo tài khoản mới</p>
+                    <h1 className="text-2xl font-bold text-foreground">ລົງທະບຽນ</h1>
+                    <p className="text-muted-foreground mt-2">ສ້າງບັນຊີໃໝ່</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="fullName" className="block text-sm font-medium text-foreground mb-1">
-                            Họ và tên
+                            ຊື່ ແລະ ນາມສະກຸນ
                         </label>
                         <input
                             id="fullName"
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            placeholder="Nguyen Van A"
+                            placeholder="Somsak Vongsa"
                             className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                     </div>
 
                     <div>
                         <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">
-                            Số điện thoại
+                            ເບີໂທລະສັບ
                         </label>
                         <input
                             id="phone"
                             type="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
-                            placeholder="0901234567"
+                            placeholder="020 12345678"
                             required
                             className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
@@ -78,7 +78,7 @@ export default function RegisterPage() {
 
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
-                            Mật khẩu
+                            ລະຫັດຜ່ານ
                         </label>
                         <input
                             id="password"
@@ -93,7 +93,7 @@ export default function RegisterPage() {
 
                     <div>
                         <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1">
-                            Xác nhận mật khẩu
+                            ຢືນຢັນລະຫັດຜ່ານ
                         </label>
                         <input
                             id="confirmPassword"
@@ -113,14 +113,14 @@ export default function RegisterPage() {
                         disabled={isLoading}
                         className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
                     >
-                        {isLoading ? "Đang xử lý..." : "Đăng ký"}
+                        {isLoading ? "ກຳລັງປະມວນຜົນ..." : "ລົງທະບຽນ"}
                     </button>
                 </form>
 
                 <div className="text-center text-sm text-muted-foreground">
-                    Đã có tài khoản?{" "}
+                    ມີບັນຊີຢູ່ແລ້ວບໍ?{" "}
                     <Link href="/login" className="text-primary hover:underline">
-                        Đăng nhập
+                        ເຂົ້າສູ່ລະບົບ
                     </Link>
                 </div>
             </div>
