@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
 
+    # Database Configuration
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/laos_ekyc"
+
+    # JWT Configuration
+    JWT_SECRET_KEY: str = "your-jwt-secret-key-change-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 1440  # 24 hours
+
     # Upload Configuration
     MAX_CONTENT_LENGTH: int = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS: Set[str] = {"png", "jpg", "jpeg", "gif", "bmp", "webp"}

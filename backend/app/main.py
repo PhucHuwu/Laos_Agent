@@ -9,7 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.api.routes import chat, upload, verification
+from app.api.routes import chat, upload, verification, auth
+from app.database import init_db
 
 
 @asynccontextmanager
@@ -18,6 +19,11 @@ async def lifespan(app: FastAPI):
     # Startup
     print(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     print(f"Server running at http://{settings.HOST}:{settings.PORT}")
+
+    # Initialize database tables
+    print("Initializing database...")
+    await init_db()
+    print("Database initialized!")
 
     yield
 
@@ -45,6 +51,7 @@ def create_app() -> FastAPI:
     )
 
     # Include routers
+    app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
     app.include_router(chat.router, prefix="/api", tags=["Chat"])
     app.include_router(upload.router, prefix="/api", tags=["Upload"])
     app.include_router(verification.router, prefix="/api", tags=["Verification"])

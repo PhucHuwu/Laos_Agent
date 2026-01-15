@@ -7,7 +7,7 @@ An AI-powered eKYC (Electronic Know Your Customer) chatbot system for Laos, feat
 ### Backend
 
 -   **Framework**: FastAPI
--   **Language**: Python 3.10+
+-   **Language**: Python 3.9+
 -   **Key Libraries**: uvicorn, httpx, websockets, pydantic
 
 ### Frontend
