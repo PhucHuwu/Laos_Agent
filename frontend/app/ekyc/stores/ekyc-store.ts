@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import type { ScanResult, VerificationResult } from "../types/verification";
 
-// Flow: idle → id_uploading → id_scanned → face_verifying → idle (reset for next user)
-type Progress = "idle" | "id_uploading" | "id_scanned" | "face_verifying";
+// Flow: idle → id_uploading → id_scanned → face_verifying → verified → idle
+type Progress = "idle" | "id_uploading" | "id_scanned" | "face_verifying" | "verified";
 
 interface EKYCState {
     progress: Progress;

@@ -22,15 +22,34 @@ export const chatApi = {
         return response.data;
     },
 
+    getHistory: async () => {
+        const response = await apiClient.get<{
+            success: boolean;
+            messages: any[];
+            context?: any;
+            progress?: string;
+            error?: string;
+        }>("/chat/history");
+        return response.data;
+    },
+
+    clearHistory: async () => {
+        const response = await apiClient.delete<{
+            success: boolean;
+            error?: string;
+        }>("/chat/history");
+        return response.data;
+    },
+
     // Streaming chat using fetch with POST (SSE)
     async *streamChat(message: string): AsyncGenerator<any, void, unknown> {
-        const sessionId = typeof window !== "undefined" ? localStorage.getItem("sessionId") : null;
+        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
 
         const response = await fetch(`${API_BASE_URL}/chat-stream`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                ...(sessionId ? { "X-Session-ID": sessionId } : {}),
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({ message }),
         });

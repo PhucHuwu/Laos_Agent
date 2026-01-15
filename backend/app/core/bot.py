@@ -168,6 +168,15 @@ class LaosEKYCBot:
         """Reset conversation to initial state"""
         self.ai_service.reset_conversation()
 
+    async def restore_conversation(self, state: Dict[str, Any]):
+        """Restore conversation state from storage"""
+        messages = state.get("messages", [])
+        context = state.get("context", {})
+        progress = state.get("progress", "idle")
+
+        self.conversation.load_from_state(messages, context, progress)
+        print(f"Restored conversation: {len(messages)} messages, progress={progress}")
+
     def get_conversation_history(self) -> list:
         """Get conversation history"""
         return self.ai_service.get_conversation_history()

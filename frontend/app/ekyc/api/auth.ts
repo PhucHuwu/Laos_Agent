@@ -56,6 +56,7 @@ export function logout(): void {
     if (typeof window !== "undefined") {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
+        localStorage.removeItem("sessionId"); // Clear chat session ID
     }
 }
 

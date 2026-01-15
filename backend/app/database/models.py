@@ -82,6 +82,8 @@ class ChatLog(Base):
         nullable=False
     )
     messages: Mapped[Optional[list]] = mapped_column(JSONB, default=list)
+    context: Mapped[Optional[dict]] = mapped_column(JSONB, default=dict)
+    progress: Mapped[str] = mapped_column(String(50), default="idle")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,

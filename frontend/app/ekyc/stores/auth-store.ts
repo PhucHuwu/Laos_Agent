@@ -4,6 +4,7 @@
 
 import { create } from "zustand";
 import * as authApi from "../api/auth";
+import { useChatStore } from "./chat-store";
 
 interface User {
     id: string;
@@ -15,6 +16,7 @@ interface AuthState {
     user: User | null;
     token: string | null;
     isAuthenticated: boolean;
+    isInitialized: boolean; // Flag to track if auth check is done
     isLoading: boolean;
     error: string | null;
 
@@ -30,6 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     token: null,
     isAuthenticated: false,
+    isInitialized: false,
     isLoading: false,
     error: null,
 
@@ -71,6 +74,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     logout: () => {
         authApi.logout();
+        useChatStore.getState().reset(); // Reset chat state
         set({
             user: null,
             token: null,
@@ -87,7 +91,10 @@ export const useAuthStore = create<AuthState>((set) => ({
                 user,
                 token,
                 isAuthenticated: true,
+                isInitialized: true,
             });
+        } else {
+            set({ isInitialized: true });
         }
     },
 

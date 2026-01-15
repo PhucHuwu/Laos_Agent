@@ -8,35 +8,42 @@ import { Header } from "./header";
 import { useChatStore } from "../../stores/chat-store";
 import { useUIStore } from "../../stores/ui-store";
 import { useEKYCStore } from "../../stores/ekyc-store";
+import { useAuthStore } from "../../stores/auth-store";
 import { chatApi } from "../../api/chat";
 
 export function ChatContainer() {
-    const { messages, addMessage, updateLastMessage, setLoading, isLoading, sessionId, setSessionId } = useChatStore();
+    const { messages, addMessage, updateLastMessage, setLoading, isLoading, loadHistory } = useChatStore();
     const { openUploadModal, openCameraModal } = useUIStore();
     const { progress, idCardUrl } = useEKYCStore();
+    const { isAuthenticated } = useAuthStore();
 
-    // Initialize session on mount
+    // Load history when authenticated
     useEffect(() => {
-        let id = localStorage.getItem("sessionId");
-        if (!id) {
-            id = "session-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-            localStorage.setItem("sessionId", id);
+        if (isAuthenticated) {
+            loadHistory();
         }
-        setSessionId(id);
-    }, [setSessionId]);
+    }, [isAuthenticated, loadHistory]);
 
-    // Add welcome message on first load
+    // Add welcome message if no messages (and history loaded)
     useEffect(() => {
-        if (messages.length === 0 && sessionId) {
-            addMessage({
-                id: "welcome",
-                role: "assistant",
-                content:
-                    "ສະບາຍດີ! ຍິນດີຕ້ອນຮັບສູ່ລະບົບ eKYC ລາວ. ຂ້ອຍແມ່ນຜູ້ຊ່ວຍ AI ທີ່ຈະຊ່ວຍທ່ານຢັ້ງຢືນຕົວຕົນ. ທ່ານສາມາດເລີ່ມຕົ້ນໂດຍການຖາມຄຳຖາມ ຫຼື ກົດປຸ່ມດ້ານລຸ່ມເພື່ອເລີ່ມຕົ້ນ.",
-                timestamp: new Date(),
-            });
+        // Only show welcome if empty and not loading (assume loadHistory handles loading state)
+        if (messages.length === 0 && isAuthenticated && !isLoading) {
+            // Optional: Add small delay to ensure history load attempt finished
+            // But for now, we rely on messages.length check after effect
+            const timer = setTimeout(() => {
+                if (messages.length === 0) {
+                    addMessage({
+                        id: "welcome",
+                        role: "assistant",
+                        content:
+                            "ສະບາຍດີ! ຍິນດີຕ້ອນຮັບສູ່ລະບົບ eKYC ລາວ. ຂ້ອຍແມ່ນຜູ້ຊ່ວຍ AI ທີ່ຈະຊ່ວຍທ່ານຢັ້ງຢືນຕົວຕົນ. ທ່ານສາມາດເລີ່ມຕົ້ນໂດຍການຖາມຄຳຖາມ ຫຼື ກົດປຸ່ມດ້ານລຸ່ມເພື່ອເລີ່ມຕົ້ນ.",
+                        timestamp: new Date(),
+                    });
+                }
+            }, 500);
+            return () => clearTimeout(timer);
         }
-    }, [messages.length, sessionId, addMessage]);
+    }, [messages.length, isAuthenticated, addMessage, isLoading]);
 
     const handleToolCalls = useCallback(
         (toolCalls: any[]) => {
@@ -72,7 +79,7 @@ export function ChatContainer() {
     );
 
     const handleSendMessage = async (message: string) => {
-        if (!sessionId || isLoading) return;
+        if (!isAuthenticated || isLoading) return;
 
         // Add user message
         addMessage({
@@ -89,6 +96,7 @@ export function ChatContainer() {
             let fullContent = "";
             let hasToolCalls = false;
             let toolCalls: any[] = [];
+            // ... (rest is same)
 
             // Add placeholder for assistant message
             const assistantMsgId = Math.random().toString(36).slice(2);

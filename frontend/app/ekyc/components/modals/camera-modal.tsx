@@ -20,7 +20,6 @@ export function CameraModal() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [similarity, setSimilarity] = useState(0);
     const [status, setStatus] = useState<"idle" | "capturing" | "success" | "failed">("idle");
-    const sessionId = typeof window !== "undefined" ? localStorage.getItem("sessionId") || "" : "";
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -50,7 +49,7 @@ export function CameraModal() {
 
         try {
             // Start WebSocket verification
-            const startResult = await verificationApi.startVerification(idCardUrl, sessionId);
+            const startResult = await verificationApi.startVerification(idCardUrl);
             console.log("Start verification result:", startResult);
 
             if (!startResult.success) {
@@ -77,7 +76,7 @@ export function CameraModal() {
                 const frameBase64 = captureFrame();
                 if (frameBase64) {
                     try {
-                        const result = await verificationApi.sendFrame(frameBase64, sessionId);
+                        const result = await verificationApi.sendFrame(frameBase64);
                         console.log("Frame result:", result);
 
                         if (result.success && result.result) {
@@ -154,14 +153,14 @@ export function CameraModal() {
         }
 
         // Stop WebSocket
-        verificationApi.stopVerification(sessionId).catch(console.error);
+        verificationApi.stopVerification().catch(console.error);
     };
 
     const handleClose = () => {
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
         }
-        verificationApi.stopVerification(sessionId).catch(console.error);
+        verificationApi.stopVerification().catch(console.error);
         closeCameraModal();
         stopCamera();
         setStatus("idle");

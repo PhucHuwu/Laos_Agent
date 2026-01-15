@@ -5,8 +5,14 @@ Upload API routes
 import os
 import uuid
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_session_id, get_bot
+from app.api.deps_auth import get_current_user_id
+from app.database import get_db
+from app.services.chat_persistence import ChatPersistenceService
 from app.config import settings
+from app.core.bot import LaosEKYCBot
 from app.models.requests import UploadResponse
 from app.utils.formatters import format_scan_result
 
@@ -26,17 +32,14 @@ def allowed_file(filename: str) -> bool:
 async def upload_file(
     file: UploadFile = File(...),
     session_id: str = Depends(get_session_id),
+    bot: "LaosEKYCBot" = Depends(get_bot),
+    db: AsyncSession = Depends(get_db),
 ):
     """Handle file upload and OCR scan"""
     print("=" * 80)
     print("UPLOAD REQUEST RECEIVED")
 
-    try:
-        bot = get_bot(session_id)
-        print(f"Bot instance retrieved successfully")
-    except Exception as e:
-        print(f"Error getting bot: {str(e)}")
-        return UploadResponse(success=False, error=f"Error initializing bot: {str(e)}")
+    # Bot is now injected and guaranteed to be initialized
 
     if not file.filename:
         print("Empty filename")
@@ -59,14 +62,39 @@ async def upload_file(
 
         if result.get("success"):
             scan_data = result.get("scan_result")
-            formatted_html = format_scan_result(scan_data) if scan_data else "<p>No scan data</p>"
+            formatted_html = format_scan_result(scan_data) if scan_data else "ບໍ່ມີຂໍ້ມູນການສະແກນ"
+
+            # Save to chat history
+            try:
+                chat_service = ChatPersistenceService(db)
+                user_uuid = uuid.UUID(session_id)
+
+                # Save User Action
+                await chat_service.save_message(
+                    user_id=user_uuid,
+                    role="user",
+                    content=f"ອັບໂຫລດບັດປະຈຳຕົວ: {file.filename}",
+                    context=jsonable_encoder(bot.conversation.context),
+                    progress=bot.conversation.progress
+                )
+
+                # Save Assistant Response
+                await chat_service.save_message(
+                    user_id=user_uuid,
+                    role="assistant",
+                    content=formatted_html,
+                    context=jsonable_encoder(bot.conversation.context),
+                    progress=bot.conversation.progress
+                )
+            except Exception as e:
+                print(f"Error saving chat history: {e}")
 
             return UploadResponse(
                 success=True,
                 image_url=result.get("image_url"),
                 scan_result=scan_data,
                 formatted_html=formatted_html,
-                message="Upload and scan successful!",
+                message="ອັບໂຫລດ ແລະ ສະແກນສຳເລັດ!",
                 id_card_url=result.get("image_url"),
                 tool_call={
                     "function": {
@@ -78,10 +106,10 @@ async def upload_file(
             )
         else:
             print(f"OCR failed: {result.get('error')}")
-            return UploadResponse(success=False, error=result.get("error", "Could not process image"))
+            return UploadResponse(success=False, error=result.get("error", "ບໍ່ສາມາດປະມວນຜົນຮູບພາບໄດ້"))
 
     except Exception as e:
         print(f"Exception during processing: {str(e)}")
         import traceback
         traceback.print_exc()
-        return UploadResponse(success=False, error=f"Error processing image: {str(e)}")
+        return UploadResponse(success=False, error=f"ເກີດຂໍ້ຜິດພາດໃນການປະມວນຜົນຮູບພາບ: {str(e)}")

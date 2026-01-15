@@ -12,12 +12,6 @@ export const apiClient = axios.create({
 // Add session ID and JWT token to all requests
 apiClient.interceptors.request.use((config) => {
     if (typeof window !== "undefined") {
-        // Add session ID
-        const sessionId = localStorage.getItem("sessionId");
-        if (sessionId) {
-            config.headers["X-Session-ID"] = sessionId;
-        }
-
         // Add JWT token for authenticated requests
         const token = localStorage.getItem("auth_token");
         if (token) {
@@ -33,7 +27,10 @@ apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem("sessionId");
+            localStorage.removeItem("auth_token");
+            if (typeof window !== "undefined") {
+                window.location.href = "/login";
+            }
         }
         return Promise.reject(error);
     }

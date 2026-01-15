@@ -111,3 +111,44 @@ class Conversation(BaseModel):
             "has_scan_result": self.context.get("scan_result") is not None,
             "verification_completed": self.context.get("verification_success", False)
         }
+
+    def load_from_state(self, messages: list, context: dict, progress: str) -> None:
+        """Load conversation state from stored data"""
+        self.messages = []
+        for msg_data in messages:
+            # Handle potential None values safely
+            tool_calls = msg_data.get("tool_calls")
+
+            msg = Message(
+                role=msg_data.get("role"),
+                content=msg_data.get("content") or "",
+                tool_calls=tool_calls if tool_calls else None
+            )
+            # Restore timestamp if available
+            if msg_data.get("timestamp"):
+                try:
+                    msg.timestamp = datetime.fromisoformat(msg_data["timestamp"])
+                except (ValueError, TypeError):
+                    pass
+            self.messages.append(msg)
+
+        self.context = context or {}
+        # Simple validation for progress
+        valid_progress = ["idle", "id_uploading", "id_scanned", "face_verifying"]
+        self.progress = progress if progress in valid_progress else "idle"
+        self.updated_at = datetime.now()
+
+    def get_state(self) -> Dict[str, Any]:
+        """Get full state for persistence"""
+        return {
+            "messages": [
+                {
+                    "role": m.role,
+                    "content": m.content,
+                    "timestamp": m.timestamp.isoformat(),
+                    "tool_calls": m.tool_calls
+                } for m in self.messages
+            ],
+            "context": self.context,
+            "progress": self.progress
+        }

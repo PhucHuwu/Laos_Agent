@@ -22,15 +22,21 @@ export function ChatBox() {
                 </div>
             ) : (
                 <>
-                    {messages.map((message) => (
-                        <MessageBubble
-                            key={message.id}
-                            role={message.role}
-                            content={message.content}
-                            timestamp={message.timestamp}
-                            isStreaming={message.isStreaming}
-                        />
-                    ))}
+                    {messages.map((message) => {
+                        // Don't render empty messages unless they serve a purpose (e.g. tool calls typically hidden)
+                        // But keep streaming messages even if currently empty to avoid flickering
+                        if (!message.content && !message.isStreaming) return null;
+
+                        return (
+                            <MessageBubble
+                                key={message.id}
+                                role={message.role}
+                                content={message.content}
+                                timestamp={message.timestamp}
+                                isStreaming={message.isStreaming}
+                            />
+                        );
+                    })}
                     {isLoading && messages[messages.length - 1]?.role !== "assistant" && <ThinkingIndicator />}
                     <div ref={messagesEndRef} />
                 </>
