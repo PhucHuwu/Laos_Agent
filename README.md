@@ -1,5 +1,8 @@
 # Laos eKYC Agent
 
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![Next.js Version](https://img.shields.io/badge/Next.js-16.0.1-009688.svg)](https://nextjs.org)
+
 An AI-powered eKYC (Electronic Know Your Customer) chatbot system for Laos, featuring document verification and identity authentication capabilities.
 
 ## Tech Stack
@@ -38,7 +41,7 @@ Laos_Agent/
 
 ### Prerequisites
 
--   Python 3.10+
+-   Python 3.9+
 -   Node.js 18+
 -   npm or pnpm
 
