@@ -57,11 +57,16 @@ async def verify_face(
                 current_context = jsonable_encoder(bot.conversation.context)
 
                 # Save "Verification Successful" message
+                # Preserve scan_result for sidebar display, only clear other temp data
+                preserved_context = {
+                    "scan_result": current_context.get("scan_result"),
+                    "id_card_url": current_context.get("id_card_url"),
+                }
                 await chat_service.save_message(
                     user_id=user_uuid,
                     role="assistant",
                     content="ການຢັ້ງຢືນໃບໜ້າສຳເລັດ! ຕົວຕົນຂອງທ່ານໄດ້ຖືກຢືນຢັນແລ້ວ.",
-                    context={},  # Reset context to empty
+                    context=preserved_context,  # Keep scan_result for sidebar
                     progress="idle"  # Reset progress to idle
                 )
 
@@ -272,11 +277,16 @@ async def send_frame(
                     chat_service = ChatPersistenceService(db)
                     msg_content = "ການຢັ້ງຢືນໃບໜ້າສຳເລັດ! ຕົວຕົນຂອງທ່ານໄດ້ຖືກຢືນຢັນແລ້ວ."
 
+                    # Preserve scan_result for sidebar display
+                    preserved_context = {
+                        "scan_result": context.get("scan_result"),
+                        "id_card_url": context.get("id_card_url"),
+                    }
                     await chat_service.save_message(
                         user_id=user_uuid,
                         role="assistant",
                         content=msg_content,
-                        context={},  # Reset context to empty
+                        context=preserved_context,  # Keep scan_result for sidebar
                         progress="idle"  # Reset progress to idle
                     )
 

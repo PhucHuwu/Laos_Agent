@@ -5,6 +5,7 @@ import { ChatBox } from "../chat/chat-box";
 import { ChatInput } from "../chat/chat-input";
 import { QuickActions } from "../chat/quick-actions";
 import { Header } from "./header";
+import { UserInfoSidebar } from "./user-info-sidebar";
 import { useChatStore } from "../../stores/chat-store";
 import { useUIStore } from "../../stores/ui-store";
 import { useEKYCStore } from "../../stores/ekyc-store";
@@ -161,12 +162,20 @@ export function ChatContainer() {
     return (
         <div className="flex flex-col h-screen bg-background overflow-hidden">
             <Header />
-            <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-4 min-h-0 overflow-hidden">
-                <ChatBox />
-                {messages.length <= 1 && <QuickActions onAction={handleQuickAction} isLoading={isLoading} />}
-            </div>
-            <div className="max-w-3xl mx-auto w-full px-4">
-                <ChatInput onSend={handleSendMessage} isLoading={isLoading} />
+            <div className="flex-1 flex overflow-hidden">
+                {/* Sidebar */}
+                <UserInfoSidebar />
+
+                {/* Main Chat Area */}
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                    <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-4 min-h-0 overflow-hidden">
+                        <ChatBox />
+                        {messages.length <= 1 && <QuickActions onAction={handleQuickAction} isLoading={isLoading} />}
+                    </div>
+                    <div className="max-w-3xl mx-auto w-full px-4">
+                        <ChatInput onSend={handleSendMessage} isLoading={isLoading} />
+                    </div>
+                </div>
             </div>
         </div>
     );

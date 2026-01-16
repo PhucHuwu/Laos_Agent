@@ -75,16 +75,14 @@ export const useChatStore = create<ChatState>((set) => ({
 
                 // Sync progress if available
                 if (response.progress) {
-                    // Import dynamically to avoid circular dependency if possible, or use window/event
-                    // But simpler: access store directly if imports allow.
-                    // Circular dev dependency might be an issue if stores import each other.
-                    // Let's use the global store access pattern if possible, or just ignore for now to avoid complexity?
-                    // No, user wants persistence.
-                    // Assuming we can import useEKYCStore here.
                     const { useEKYCStore } = require("./ekyc-store");
                     useEKYCStore.getState().setProgress(response.progress);
                     if (response.context?.id_card_url) {
                         useEKYCStore.getState().setIdCardUrl(response.context.id_card_url);
+                    }
+                    // Sync scan result (OCR data) for sidebar display
+                    if (response.context?.scan_result) {
+                        useEKYCStore.getState().setScanResult(response.context.scan_result);
                     }
                 }
             }
