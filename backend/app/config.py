@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # API Configuration
     API_KEY: str
     API_URL: str = "https://openrouter.ai/api/v1/chat/completions"
-    MODEL: str = "deepseek/deepseek-v3.2"
+    MODEL: str = "z-ai/glm-4.7"
 
     # OCR API Configuration
     OCR_UPLOAD_URL: str = "http://your-ocr-server:3724/api/v1/ocr/upload-image"

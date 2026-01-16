@@ -278,10 +278,11 @@ async def send_frame(
                     msg_content = "ການຢັ້ງຢືນໃບໜ້າສຳເລັດ! ຕົວຕົນຂອງທ່ານໄດ້ຖືກຢືນຢັນແລ້ວ."
 
                     # Preserve scan_result for sidebar display
-                    preserved_context = {
+                    # Apply jsonable_encoder to serialize datetime objects
+                    preserved_context = jsonable_encoder({
                         "scan_result": context.get("scan_result"),
                         "id_card_url": context.get("id_card_url"),
-                    }
+                    })
                     await chat_service.save_message(
                         user_id=user_uuid,
                         role="assistant",

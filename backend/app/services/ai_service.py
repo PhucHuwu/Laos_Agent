@@ -104,27 +104,26 @@ Act as a professional eKYC consultant."""
         ]
 
     def _get_context_message(self) -> Dict[str, str]:
-        """Generate context message based on current state"""
-        progress_summary = self.conversation.get_progress_summary()
+        """Generate context message based on current state - NO USER DATA for privacy"""
+        progress = self.conversation.progress
+        has_scan_result = self.conversation.context.get("scan_result") is not None
+
         progress_descriptions = {
-            "idle": "User has not started eKYC process yet (or just completed and reset)",
+            "idle": "User has not started eKYC process yet (or already completed verification)",
             "id_uploading": "User is uploading ID card image",
-            "id_scanned": "User has successfully scanned ID card, extracted information is available",
+            "id_scanned": "User has successfully scanned ID card, ready for face verification",
             "face_verifying": "User is currently in face verification process"
         }
 
         context_parts = [
-            f"CURRENT eKYC PROGRESS: {progress_summary['progress'].upper()} - {progress_descriptions.get(progress_summary['progress'], '')}"
+            f"CURRENT eKYC PROGRESS: {progress.upper()} - {progress_descriptions.get(progress, '')}"
         ]
 
-        if progress_summary['has_id_card']:
-            context_parts.append(f"ID card URL available: {progress_summary['id_card_url']}")
-
-        if progress_summary['has_scan_result']:
-            context_parts.append("ID card information has been extracted and available")
-
-        if progress_summary['verification_completed']:
-            context_parts.append("Face verification completed successfully")
+        # If progress is idle BUT we have scan_result, user already completed eKYC
+        if progress == 'idle' and has_scan_result:
+            context_parts.append("USER HAS ALREADY COMPLETED eKYC VERIFICATION SUCCESSFULLY!")
+            context_parts.append("If user wants to verify again, they need to START FRESH with open_id_scan tool.")
+            context_parts.append("VERIFIED STATUS: User is already verified. No need to continue eKYC flow unless they explicitly want to re-verify.")
 
         context_parts.append("LANGUAGE: Always respond in Lao, regardless of input language.")
 
