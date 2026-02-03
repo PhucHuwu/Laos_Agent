@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_session_id, get_bot
-from app.api.deps_auth import get_current_user_id
 from app.database import get_db
 from app.services.chat_persistence import ChatPersistenceService
 from app.config import settings
@@ -67,11 +66,11 @@ async def upload_file(
             # Save to chat history
             try:
                 chat_service = ChatPersistenceService(db)
-                user_uuid = uuid.UUID(session_id)
+                session_uuid = uuid.UUID(session_id)
 
                 # Save User Action
                 await chat_service.save_message(
-                    user_id=user_uuid,
+                    session_id=session_uuid,
                     role="user",
                     content=f"ອັບໂຫລດບັດປະຈຳຕົວ: {file.filename}",
                     context=jsonable_encoder(bot.conversation.context),
@@ -80,7 +79,7 @@ async def upload_file(
 
                 # Save Assistant Response
                 await chat_service.save_message(
-                    user_id=user_uuid,
+                    session_id=session_uuid,
                     role="assistant",
                     content=formatted_html,
                     context=jsonable_encoder(bot.conversation.context),

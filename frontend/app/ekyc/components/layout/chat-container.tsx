@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { ChatBox } from "../chat/chat-box";
 import { ChatInput } from "../chat/chat-input";
 import { QuickActions } from "../chat/quick-actions";
@@ -9,28 +9,43 @@ import { UserInfoSidebar } from "./user-info-sidebar";
 import { useChatStore } from "../../stores/chat-store";
 import { useUIStore } from "../../stores/ui-store";
 import { useEKYCStore } from "../../stores/ekyc-store";
-import { useAuthStore } from "../../stores/auth-store";
 import { chatApi } from "../../api/chat";
 
 export function ChatContainer() {
     const { messages, addMessage, updateLastMessage, setLoading, isLoading, loadHistory } = useChatStore();
-    const { openUploadModal, openCameraModal } = useUIStore();
+    const { openUploadModal, openCameraModal, toggleSidebar } = useUIStore();
     const { progress, idCardUrl } = useEKYCStore();
-    const { isAuthenticated } = useAuthStore();
 
-    // Load history when authenticated
-    useEffect(() => {
-        if (isAuthenticated) {
-            loadHistory();
+    // Swipe gesture handling
+    const touchStartX = useRef<number>(0);
+    const touchEndX = useRef<number>(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        touchEndX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = () => {
+        const swipeDistance = touchEndX.current - touchStartX.current;
+        // Swipe right from left edge (within 50px of left edge) to open sidebar
+        if (touchStartX.current < 50 && swipeDistance > 80) {
+            toggleSidebar();
         }
-    }, [isAuthenticated, loadHistory]);
+        touchStartX.current = 0;
+        touchEndX.current = 0;
+    };
+
+    // Load history on mount
+    useEffect(() => {
+        loadHistory();
+    }, [loadHistory]);
 
     // Add welcome message if no messages (and history loaded)
     useEffect(() => {
-        // Only show welcome if empty and not loading (assume loadHistory handles loading state)
-        if (messages.length === 0 && isAuthenticated && !isLoading) {
-            // Optional: Add small delay to ensure history load attempt finished
-            // But for now, we rely on messages.length check after effect
+        if (messages.length === 0 && !isLoading) {
             const timer = setTimeout(() => {
                 if (messages.length === 0) {
                     addMessage({
@@ -44,7 +59,7 @@ export function ChatContainer() {
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [messages.length, isAuthenticated, addMessage, isLoading]);
+    }, [messages.length, addMessage, isLoading]);
 
     const handleToolCalls = useCallback(
         (toolCalls: any[]) => {
@@ -76,11 +91,11 @@ export function ChatContainer() {
                 }, 500);
             }
         },
-        [addMessage, openUploadModal, openCameraModal]
+        [addMessage, openUploadModal, openCameraModal],
     );
 
     const handleSendMessage = async (message: string) => {
-        if (!isAuthenticated || isLoading) return;
+        if (isLoading) return;
 
         // Add user message
         addMessage({
@@ -160,7 +175,12 @@ export function ChatContainer() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-background overflow-hidden">
+        <div
+            className="flex flex-col h-screen bg-background overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
             <Header />
             <div className="flex-1 flex overflow-hidden">
                 {/* Sidebar */}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEKYCStore } from "../../stores/ekyc-store";
-import { useAuthStore } from "../../stores/auth-store";
+import { useUIStore } from "../../stores/ui-store";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const progressLabels: Record<string, { label: string; color: string }> = {
     idle: { label: "Idle", color: "bg-gray-500" },
@@ -12,33 +12,30 @@ const progressLabels: Record<string, { label: string; color: string }> = {
 };
 
 export function Header() {
-    const router = useRouter();
     const { progress, idCardUrl } = useEKYCStore();
-    const { user, logout } = useAuthStore();
+    const { toggleSidebar } = useUIStore();
     const statusInfo = progressLabels[progress] || progressLabels.idle;
-
-    const handleLogout = () => {
-        logout();
-        router.push("/login");
-    };
 
     return (
         <header className="border-b border-border bg-card">
             <div className="flex items-center justify-between p-4 max-w-4xl mx-auto">
+                {/* Left: Mobile menu button - Arrow icon */}
                 <div className="flex items-center gap-2">
-                    {user?.isVerified && <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-600">Verified</span>}
+                    <button onClick={toggleSidebar} className="p-2 rounded-lg hover:bg-muted transition-colors md:hidden" aria-label="Open sidebar">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
+                {/* Center: Title */}
                 <div className="text-center">
                     <h1 className="text-xl font-semibold">eKYC Laos</h1>
-                    <p className="text-sm text-muted-foreground">ການຢັ້ງຢືນຕົວຕົນທາງເອເລັກໂຕຣນິກ</p>
+                    <p className="text-sm text-muted-foreground hidden sm:block">ການຢັ້ງຢືນຕົວຕົນທາງເອເລັກໂຕຣນິກ</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <div className="text-xs space-y-1">
-                        <div className={`${statusInfo.color} text-white px-2 py-1 rounded-full text-center`}>{statusInfo.label}</div>
-                    </div>
-                    <button onClick={handleLogout} className="px-3 py-1.5 text-sm rounded-lg border border-border hover:bg-muted transition-colors">
-                        ອອກຈາກລະບົບ
-                    </button>
+                {/* Right: Status + Theme toggle */}
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <div className={`${statusInfo.color} text-white px-2 py-1 rounded-full text-center text-xs`}>{statusInfo.label}</div>
+                    <ThemeToggle />
                 </div>
             </div>
         </header>

@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.api.routes import chat, upload, verification, auth, ekyc_profile
+from app.api.routes import chat, upload, verification, ekyc_profile
 from app.database import init_db
 
 
@@ -51,7 +51,7 @@ def create_app() -> FastAPI:
     )
 
     # Include routers
-    app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+
     app.include_router(chat.router, prefix="/api", tags=["Chat"])
     app.include_router(upload.router, prefix="/api", tags=["Upload"])
     app.include_router(verification.router, prefix="/api", tags=["Verification"])

@@ -50,34 +50,22 @@ async def verify_face(
             # Check verification result
             if result_data.get("same_person") is True:
                 # --- Persistence Logic START ---
-                # --- Persistence Logic START ---
-                # Save to Chat History with IDLE state
                 chat_service = ChatPersistenceService(db)
-                user_uuid = uuid.UUID(session_id)
+                session_uuid = uuid.UUID(session_id)
                 current_context = jsonable_encoder(bot.conversation.context)
 
                 # Save "Verification Successful" message
-                # Preserve scan_result for sidebar display, only clear other temp data
                 preserved_context = {
                     "scan_result": current_context.get("scan_result"),
                     "id_card_url": current_context.get("id_card_url"),
                 }
                 await chat_service.save_message(
-                    user_id=user_uuid,
+                    session_id=session_uuid,
                     role="assistant",
                     content="ການຢັ້ງຢືນໃບໜ້າສຳເລັດ! ຕົວຕົນຂອງທ່ານໄດ້ຖືກຢືນຢັນແລ້ວ.",
-                    context=preserved_context,  # Keep scan_result for sidebar
-                    progress="idle"  # Reset progress to idle
+                    context=preserved_context,
+                    progress="idle"
                 )
-
-                # Also update User status (if not done elsewhere)
-                from app.database.models import User
-                user = await db.get(User, user_uuid)
-                if user:
-                    user.is_verified = True
-                    db.add(user)
-                    await db.commit()
-                # --- Persistence Logic END ---
                 # --- Persistence Logic END ---
 
                 # Delete bot session completely - next request will create fresh instance
@@ -222,7 +210,7 @@ async def send_frame(
                     # 1. Save Selfie Image
                     import base64
                     import os
-                    from app.database.models import EKYCRecord, User
+                    from app.database.models import EKYCRecord
                     from uuid import UUID
                     from datetime import datetime
 
@@ -230,12 +218,10 @@ async def send_frame(
                     file_ext = "jpg"
                     filename = f"selfie_{session_id}_{int(datetime.utcnow().timestamp())}.{file_ext}"
                     upload_dir = "static/uploads"
-                    # Ensure dir exists (should exist)
                     os.makedirs(upload_dir, exist_ok=True)
                     file_path = os.path.join(upload_dir, filename)
 
-                    # Decode and save
-                    # frame_base64 format usually: "data:image/jpeg;base64,....." or just raw base64
+                    # Decode and save selfie image
                     base64_data = request.frame_base64
                     if "," in base64_data:
                         base64_data = base64_data.split(",")[1]
@@ -243,56 +229,39 @@ async def send_frame(
                     with open(file_path, "wb") as f:
                         f.write(base64.b64decode(base64_data))
 
-                    selfie_url = f"/static/uploads/{filename}"  # Relative URL serving
+                    selfie_url = f"/static/uploads/{filename}"
 
-                    # 2. Create EKYC Record
-                    # Get context data
+                    # Create EKYC Record with session_id
                     context = bot.conversation.context or {}
-
-                    user_uuid = UUID(session_id)
+                    session_uuid = UUID(session_id)
 
                     new_record = EKYCRecord(
-                        user_id=user_uuid,
+                        session_id=session_uuid,
                         id_card_image_url=context.get("id_card_url"),
                         selfie_image_url=selfie_url,
-                        ocr_data=jsonable_encoder(context.get("scan_result")),  # Fix serialization
+                        ocr_data=jsonable_encoder(context.get("scan_result")),
                         face_match_score=result.get("similarity"),
                         is_verified=True,
                         verified_at=datetime.utcnow()
                     )
                     db.add(new_record)
-
-                    # 3. Update User Status
-                    # Fetch user to update
-                    user = await db.get(User, user_uuid)
-                    if user:
-                        user.is_verified = True
-                        user.updated_at = datetime.utcnow()
-                        db.add(user)  # Should be tracked automatically but explicit add is safe
-
                     await db.commit()
-                    print(f"[DB] EKYC Record saved and User verified: {session_id}")
+                    print(f"[DB] EKYC Record saved for session: {session_id}")
 
-                    # 4. Save to Chat History
+                    # Save to Chat History
                     chat_service = ChatPersistenceService(db)
                     msg_content = "ການຢັ້ງຢືນໃບໜ້າສຳເລັດ! ຕົວຕົນຂອງທ່ານໄດ້ຖືກຢືນຢັນແລ້ວ."
-
-                    # Preserve scan_result for sidebar display
-                    # Apply jsonable_encoder to serialize datetime objects
                     preserved_context = jsonable_encoder({
                         "scan_result": context.get("scan_result"),
                         "id_card_url": context.get("id_card_url"),
                     })
                     await chat_service.save_message(
-                        user_id=user_uuid,
+                        session_id=session_uuid,
                         role="assistant",
                         content=msg_content,
-                        context=preserved_context,  # Keep scan_result for sidebar
-                        progress="idle"  # Reset progress to idle
+                        context=preserved_context,
+                        progress="idle"
                     )
-
-                    # --- Persistence Logic END ---
-
                     # --- Persistence Logic END ---
 
                     delete_bot_session(session_id)

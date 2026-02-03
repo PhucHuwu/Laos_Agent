@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
 
-from app.api.deps_auth import get_current_user_id
+from app.api.deps import get_session_id
 from app.database import get_db
 from app.database.models import EKYCRecord
 
@@ -31,18 +31,18 @@ class EKYCProfileResponse(BaseModel):
 
 @router.get("/ekyc/profile", response_model=EKYCProfileResponse)
 async def get_ekyc_profile(
-    user_id: str = Depends(get_current_user_id),
+    session_id: str = Depends(get_session_id),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Get the latest eKYC profile for authenticated user.
+    Get the latest eKYC profile for session.
     Returns OCR data extracted from ID card for sidebar display.
     """
     try:
-        # Get latest ekyc record for user (ordered by created_at desc)
+        # Get latest ekyc record for session (ordered by created_at desc)
         result = await db.execute(
             select(EKYCRecord)
-            .where(EKYCRecord.user_id == UUID(user_id))
+            .where(EKYCRecord.session_id == UUID(session_id))
             .order_by(EKYCRecord.created_at.desc())
             .limit(1)
         )

@@ -1,18 +1,33 @@
+"""
+API Dependencies - Session management without authentication
+"""
+
 import time
-from typing import Dict, Optional
+import uuid
+from typing import Dict
 from uuid import UUID
 from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.bot import LaosEKYCBot
 from app.config import settings
-from app.api.deps_auth import get_current_user_id
 from app.database.connection import get_db
 from app.services.chat_persistence import ChatPersistenceService
 
-# Store bot instances per USER ID (with cleanup)
+# Store bot instances per session ID (with cleanup)
 bot_sessions: Dict[str, LaosEKYCBot] = {}
 session_timestamps: Dict[str, float] = {}
+
+
+def get_session_id(x_session_id: str = Header(default=None)) -> str:
+    """
+    Get session ID from header or generate a new one.
+    No authentication - just session tracking.
+    """
+    if x_session_id:
+        return x_session_id
+    # Generate new session ID if not provided
+    return str(uuid.uuid4())
 
 
 def cleanup_old_sessions():
@@ -30,55 +45,49 @@ def cleanup_old_sessions():
 
 
 async def get_bot(
-    user_id: str = Depends(get_current_user_id),
+    session_id: str = Depends(get_session_id),
     db: AsyncSession = Depends(get_db)
 ) -> LaosEKYCBot:
     """
-    Get or create bot instance for authenticated user.
+    Get or create bot instance for session.
     Restores state from database if creating new instance.
     """
     # Cleanup old sessions periodically
     cleanup_old_sessions()
 
-    # Get or create bot for this user
-    if user_id not in bot_sessions:
-        print(f"Creating/Restoring bot for user: {user_id}")
+    # Get or create bot for this session
+    if session_id not in bot_sessions:
+        print(f"Creating/Restoring bot for session: {session_id}")
         bot = LaosEKYCBot()
 
-        # Restore state from DB
+        # Try to restore state from DB
         try:
             persistence = ChatPersistenceService(db)
-            state = await persistence.get_chat_history(UUID(user_id))
+            state = await persistence.get_chat_history(UUID(session_id))
             await bot.restore_conversation(state)
         except Exception as e:
             print(f"Failed to restore bot state: {e}")
             # Continue with empty bot if restore fails
 
-        bot_sessions[user_id] = bot
+        bot_sessions[session_id] = bot
     else:
-        print(f"Using cached bot for user: {user_id}")
+        print(f"Using cached bot for session: {session_id}")
 
     # Update timestamp
-    session_timestamps[user_id] = time.time()
+    session_timestamps[session_id] = time.time()
 
-    return bot_sessions[user_id]
+    return bot_sessions[session_id]
 
 
-def delete_bot_session(user_id: str) -> bool:
+def delete_bot_session(session_id: str) -> bool:
     """
     Delete a bot session completely.
     Use this after successful verification to ensure next session starts fresh.
     """
-    if user_id in bot_sessions:
-        del bot_sessions[user_id]
-        if user_id in session_timestamps:
-            del session_timestamps[user_id]
-        print(f"Deleted bot session for user: {user_id}")
+    if session_id in bot_sessions:
+        del bot_sessions[session_id]
+        if session_id in session_timestamps:
+            del session_timestamps[session_id]
+        print(f"Deleted bot session: {session_id}")
         return True
     return False
-
-# Legacy support/Helper for endpoints explicitly needing session_id string
-
-
-def get_session_id(user_id: str = Depends(get_current_user_id)) -> str:
-    return user_id

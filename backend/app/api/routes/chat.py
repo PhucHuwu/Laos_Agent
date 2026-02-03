@@ -12,9 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
 from app.api.deps import get_session_id, get_bot
-from app.api.deps_auth import get_current_user_id
 from app.database import get_db
-from app.database.models import User
 from app.services.chat_persistence import ChatPersistenceService
 from app.core.bot import LaosEKYCBot
 from app.models.requests import (
@@ -56,7 +54,6 @@ async def chat(
 async def chat_stream(
     request: ChatRequest,
     session_id: str = Depends(get_session_id),
-    user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
     bot: LaosEKYCBot = Depends(get_bot),
 ):
@@ -70,10 +67,10 @@ async def chat_stream(
 
     # Save user message to DB
     try:
-        await chat_service.save_message(UUID(user_id), "user", request.message)
+        await chat_service.save_message(UUID(session_id), "user", request.message)
     except Exception as e:
         print(f"Error saving user message: {e}")
-        # Continue even if save fails? verify later.
+        # Continue even if save fails
 
     async def generate():
         full_content = ""
@@ -86,8 +83,6 @@ async def chat_stream(
                     if chunk.get("type") == "content":
                         full_content += chunk.get("content", "")
                     elif chunk.get("type") == "tool_calls":
-                        # Assume complete tool calls are yielded or handle merging
-                        # For simplicity, we assume the chunk contains tool_calls list
                         tc = chunk.get("tool_calls", [])
                         if isinstance(tc, list):
                             full_tool_calls.extend(tc)
@@ -99,7 +94,7 @@ async def chat_stream(
             # Save assistant message to DB
             if full_content or full_tool_calls:
                 await chat_service.save_message(
-                    UUID(user_id),
+                    UUID(session_id),
                     "assistant",
                     full_content,
                     tool_calls=full_tool_calls if full_tool_calls else None
@@ -179,14 +174,13 @@ class SaveMessageRequest(BaseModel):
 
 @router.get("/chat/history", response_model=ChatHistoryResponse)
 async def get_chat_history(
-    user_id: str = Depends(get_current_user_id),
+    session_id: str = Depends(get_session_id),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get chat history for authenticated user"""
+    """Get chat history for session"""
     try:
         service = ChatPersistenceService(db)
-        # Returns dict with messages, context, progress
-        data = await service.get_chat_history(UUID(user_id))
+        data = await service.get_chat_history(UUID(session_id))
 
         return ChatHistoryResponse(
             success=True,
@@ -201,14 +195,14 @@ async def get_chat_history(
 @router.post("/chat/history")
 async def save_chat_message(
     request: SaveMessageRequest,
-    user_id: str = Depends(get_current_user_id),
+    session_id: str = Depends(get_session_id),
     db: AsyncSession = Depends(get_db),
 ):
     """Save a message to chat history"""
     try:
         service = ChatPersistenceService(db)
         await service.save_message(
-            user_id=UUID(user_id),
+            session_id=UUID(session_id),
             role=request.role,
             content=request.content,
         )
@@ -219,13 +213,13 @@ async def save_chat_message(
 
 @router.delete("/chat/history")
 async def clear_chat_history(
-    user_id: str = Depends(get_current_user_id),
+    session_id: str = Depends(get_session_id),
     db: AsyncSession = Depends(get_db),
 ):
-    """Clear chat history for authenticated user"""
+    """Clear chat history for session"""
     try:
         service = ChatPersistenceService(db)
-        await service.clear_history(UUID(user_id))
+        await service.clear_history(UUID(session_id))
         return {"success": True}
     except Exception as e:
         return {"success": False, "error": str(e)}

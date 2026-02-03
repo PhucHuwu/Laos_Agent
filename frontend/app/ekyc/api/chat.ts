@@ -43,13 +43,18 @@ export const chatApi = {
 
     // Streaming chat using fetch with POST (SSE)
     async *streamChat(message: string): AsyncGenerator<any, void, unknown> {
-        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+        // Get session ID from localStorage
+        let sessionId = typeof window !== "undefined" ? localStorage.getItem("session_id") : null;
+        if (!sessionId && typeof window !== "undefined") {
+            sessionId = crypto.randomUUID();
+            localStorage.setItem("session_id", sessionId);
+        }
 
         const response = await fetch(`${API_BASE_URL}/chat-stream`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                ...(sessionId ? { "X-Session-ID": sessionId } : {}),
             },
             body: JSON.stringify({ message }),
         });

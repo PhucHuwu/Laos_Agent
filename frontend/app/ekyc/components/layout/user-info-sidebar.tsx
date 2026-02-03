@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuthStore } from "../../stores/auth-store";
 import { ekycProfileApi, type EKYCProfileResponse } from "../../api/ekyc-profile";
+import { useUIStore } from "../../stores/ui-store";
 
 interface InfoFieldProps {
     label: string;
@@ -19,28 +19,26 @@ function InfoField({ label, value }: InfoFieldProps) {
 }
 
 export function UserInfoSidebar() {
-    const { user, isAuthenticated } = useAuthStore();
     const [profile, setProfile] = useState<EKYCProfileResponse | null>(null);
     const [loading, setLoading] = useState(false);
+    const { sidebarOpen, closeSidebar } = useUIStore();
 
     // Fetch eKYC profile from database
     useEffect(() => {
-        if (isAuthenticated) {
-            setLoading(true);
-            ekycProfileApi
-                .getProfile()
-                .then((data) => {
-                    if (data.success) {
-                        setProfile(data);
-                    }
-                })
-                .catch((err) => console.error("Failed to fetch eKYC profile:", err))
-                .finally(() => setLoading(false));
-        }
-    }, [isAuthenticated]);
+        setLoading(true);
+        ekycProfileApi
+            .getProfile()
+            .then((data) => {
+                if (data.success) {
+                    setProfile(data);
+                }
+            })
+            .catch((err) => console.error("Failed to fetch eKYC profile:", err))
+            .finally(() => setLoading(false));
+    }, []);
 
     const fields = profile?.ocr_data?.fields;
-    const isVerified = profile?.is_verified || user?.isVerified;
+    const isVerified = profile?.is_verified;
 
     // Build address string
     const addressParts = [];
@@ -58,8 +56,8 @@ export function UserInfoSidebar() {
     // Get face image URL from ocr_data.raw_data
     const faceImgUrl = profile?.ocr_data?.raw_data?.img_url;
 
-    return (
-        <aside className="w-72 shrink-0 border-r border-border bg-card p-4 overflow-y-auto hidden md:block">
+    const sidebarContent = (
+        <>
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-foreground">ຂໍ້ມູນຜູ້ໃຊ້</h2>
@@ -72,7 +70,7 @@ export function UserInfoSidebar() {
                 </div>
             ) : (
                 <>
-                    {/* User Photo - Use face image from OCR raw_data */}
+                    {/* User Photo */}
                     <div className="mb-4 flex justify-center">
                         {faceImgUrl ? (
                             <img src={faceImgUrl} alt="User Photo" className="w-24 h-24 rounded-lg object-contain border border-border bg-muted" />
@@ -112,6 +110,32 @@ export function UserInfoSidebar() {
                     )}
                 </>
             )}
-        </aside>
+        </>
+    );
+
+    return (
+        <>
+            {/* Desktop Sidebar */}
+            <aside className="w-72 shrink-0 border-r border-border bg-card p-4 overflow-y-auto hidden md:block">{sidebarContent}</aside>
+
+            {/* Mobile Sidebar Overlay */}
+            {sidebarOpen && (
+                <div className="fixed inset-0 z-50 md:hidden">
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={closeSidebar} />
+                    {/* Sidebar Panel */}
+                    <aside className="absolute left-0 top-0 bottom-0 w-72 bg-card p-4 overflow-y-auto shadow-xl animate-in slide-in-from-left duration-200">
+                        {/* Close button */}
+                        <button onClick={closeSidebar} className="absolute top-4 right-4 p-1 rounded-lg hover:bg-muted transition-colors z-10">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        {/* Content with top padding to avoid close button */}
+                        <div className="pt-8">{sidebarContent}</div>
+                    </aside>
+                </div>
+            )}
+        </>
     );
 }

@@ -2,6 +2,18 @@ import axios from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3724/api";
 
+// Generate or get session ID
+function getSessionId(): string {
+    if (typeof window === "undefined") return "";
+
+    let sessionId = localStorage.getItem("session_id");
+    if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        localStorage.setItem("session_id", sessionId);
+    }
+    return sessionId;
+}
+
 export const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -9,16 +21,14 @@ export const apiClient = axios.create({
     },
 });
 
-// Add session ID and JWT token to all requests
+// Add session ID to all requests
 apiClient.interceptors.request.use((config) => {
     if (typeof window !== "undefined") {
-        // Add JWT token for authenticated requests
-        const token = localStorage.getItem("auth_token");
-        if (token) {
-            config.headers["Authorization"] = `Bearer ${token}`;
+        const sessionId = getSessionId();
+        if (sessionId) {
+            config.headers["X-Session-ID"] = sessionId;
         }
     }
-
     return config;
 });
 
@@ -26,12 +36,8 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            localStorage.removeItem("auth_token");
-            if (typeof window !== "undefined") {
-                window.location.href = "/login";
-            }
-        }
         return Promise.reject(error);
-    }
+    },
 );
+
+export { getSessionId };

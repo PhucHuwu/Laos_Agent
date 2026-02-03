@@ -8,7 +8,7 @@ from typing import Optional, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.database.models import ChatLog, User
+from app.database.models import ChatLog
 
 
 class ChatPersistenceService:
@@ -17,10 +17,10 @@ class ChatPersistenceService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_chat_history(self, user_id: UUID) -> Dict[str, Any]:
-        """Load chat history and state for a user"""
+    async def get_chat_history(self, session_id: UUID) -> Dict[str, Any]:
+        """Load chat history and state for a session"""
         result = await self.db.execute(
-            select(ChatLog).where(ChatLog.user_id == user_id)
+            select(ChatLog).where(ChatLog.session_id == session_id)
         )
         chat_log = result.scalar_one_or_none()
 
@@ -34,7 +34,7 @@ class ChatPersistenceService:
 
     async def save_message(
         self,
-        user_id: UUID,
+        session_id: UUID,
         role: str,
         content: str,
         tool_calls: Optional[List] = None,
@@ -43,7 +43,7 @@ class ChatPersistenceService:
     ) -> None:
         """Save a single message to chat history with state"""
         result = await self.db.execute(
-            select(ChatLog).where(ChatLog.user_id == user_id)
+            select(ChatLog).where(ChatLog.session_id == session_id)
         )
         chat_log = result.scalar_one_or_none()
 
@@ -66,7 +66,7 @@ class ChatPersistenceService:
         else:
             # Create new chat log
             chat_log = ChatLog(
-                user_id=user_id,
+                session_id=session_id,
                 messages=[message],
                 context=context or {},
                 progress=progress
@@ -75,10 +75,10 @@ class ChatPersistenceService:
 
         await self.db.commit()
 
-    async def clear_history(self, user_id: UUID) -> None:
-        """Clear chat history for a user"""
+    async def clear_history(self, session_id: UUID) -> None:
+        """Clear chat history for a session"""
         result = await self.db.execute(
-            select(ChatLog).where(ChatLog.user_id == user_id)
+            select(ChatLog).where(ChatLog.session_id == session_id)
         )
         chat_log = result.scalar_one_or_none()
 
